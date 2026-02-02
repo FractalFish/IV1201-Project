@@ -17,10 +17,10 @@ public class Person {
     @Column(name = "surname")
     private String surname;
 
-    @Column(name = "pnr")
+    @Column(name = "pnr", nullable = true)
     private String pnr;
 
-    @Column(name = "email")
+    @Column(name = "email", nullable = true)
     private String email;
 
     @Column(name = "password")
