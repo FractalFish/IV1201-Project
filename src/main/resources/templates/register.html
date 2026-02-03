@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="#{register.title}">Register</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+    <div class="container">
+        <h1 th:text="#{register.heading}">Create Account</h1>
+        
+        <form th:action="@{/register}" th:object="${registrationForm}" method="post">
+            
+            <!-- Global error message -->
+            <div th:if="${#fields.hasGlobalErrors()}" class="error-message">
+                <p th:each="err : ${#fields.globalErrors()}" th:text="${err}">Error</p>
+            </div>
+            
+            <div class="form-group">
+                <label for="username" th:text="#{register.username}">Username</label>
+                <input type="text" id="username" th:field="*{username}" 
+                       th:placeholder="#{register.username.placeholder}" required>
+                <span th:if="${#fields.hasErrors('username')}" class="field-error" 
+                      th:errors="*{username}">Username error</span>
+            </div>
+            
+            <div class="form-group">
+                <label for="password" th:text="#{register.password}">Password</label>
+                <input type="password" id="password" th:field="*{password}" 
+                       th:placeholder="#{register.password.placeholder}" required>
+                <span th:if="${#fields.hasErrors('password')}" class="field-error" 
+                      th:errors="*{password}">Password error</span>
+            </div>
+            
+            <div class="form-group">
+                <label for="name" th:text="#{register.name}">First Name</label>
+                <input type="text" id="name" th:field="*{name}" 
+                       th:placeholder="#{register.name.placeholder}" required>
+                <span th:if="${#fields.hasErrors('name')}" class="field-error" 
+                      th:errors="*{name}">Name error</span>
+            </div>
+            
+            <div class="form-group">
+                <label for="surname" th:text="#{register.surname}">Last Name</label>
+                <input type="text" id="surname" th:field="*{surname}" 
+                       th:placeholder="#{register.surname.placeholder}" required>
+                <span th:if="${#fields.hasErrors('surname')}" class="field-error" 
+                      th:errors="*{surname}">Surname error</span>
+            </div>
+            
+            <div class="form-group">
+                <label for="pnr" th:text="#{register.pnr}">Personal Number (optional)</label>
+                <input type="text" id="pnr" th:field="*{pnr}" 
+                       th:placeholder="#{register.pnr.placeholder}">
+                <span th:if="${#fields.hasErrors('pnr')}" class="field-error" 
+                      th:errors="*{pnr}">PNR error</span>
+            </div>
+            
+            <div class="form-group">
+                <label for="email" th:text="#{register.email}">Email (optional)</label>
+                <input type="email" id="email" th:field="*{email}" 
+                       th:placeholder="#{register.email.placeholder}">
+                <span th:if="${#fields.hasErrors('email')}" class="field-error" 
+                      th:errors="*{email}">Email error</span>
+            </div>
+            
+            <button type="submit" th:text="#{register.submit}">Register</button>
+        </form>
+        
+        <p class="login-link">
+            <span th:text="#{register.already.account}">Already have an account?</span>
+            <a th:href="@{/login}" th:text="#{register.login.link}">Login here</a>
+        </p>
+    </div>
+</body>
+</html>
