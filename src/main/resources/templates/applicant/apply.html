@@ -19,36 +19,132 @@
         </header>
         
         <main>
+            <!-- Error message -->
+            <div th:if="${error}" class="alert alert-error">
+                <p th:text="${error}">An error occurred.</p>
+            </div>
+
             <div class="apply-card">
                 <p th:text="#{applicant.apply.instructions}">
-                    By submitting an application, you express your interest in working with us.
+                    Fill in your competences and availability periods below.
                 </p>
                 
-                <div class="person-info">
-                    <h3 th:text="#{applicant.apply.your.info}">Your Information</h3>
-                    <dl>
-                        <dt th:text="#{applicant.apply.name}">Name</dt>
-                        <dd th:text="${person.name + ' ' + person.surname}">John Doe</dd>
+                <form th:action="@{/applicant/apply}" th:object="${applicationForm}" method="post" id="applicationForm">
+                    
+                    <!-- Competences Section -->
+                    <section class="form-section">
+                        <h2 th:text="#{applicant.apply.competences}">Competences</h2>
+                        <p class="section-help" th:text="#{applicant.apply.competences.help}">Add your relevant competences and years of experience.</p>
                         
-                        <dt th:text="#{applicant.apply.email}">Email</dt>
-                        <dd th:text="${person.email ?: '-'}">email@example.com</dd>
+                        <div id="competences-container">
+                            <!-- Competence rows will be added here by JavaScript -->
+                        </div>
                         
-                        <dt th:text="#{applicant.apply.pnr}">Personal Number</dt>
-                        <dd th:text="${person.pnr ?: '-'}">12345678-1234</dd>
-                    </dl>
-                </div>
-                
-                <form th:action="@{/applicant/apply}" method="post" class="apply-form">
-                    <button type="submit" class="btn btn-primary" th:text="#{applicant.apply.submit}">
-                        Submit Application
-                    </button>
+                        <button type="button" class="btn btn-secondary" onclick="addCompetence()" th:text="#{applicant.apply.add.competence}">
+                            + Add Competence
+                        </button>
+                    </section>
+                    
+                    <!-- Availability Section -->
+                    <section class="form-section">
+                        <h2 th:text="#{applicant.apply.availability}">Availability</h2>
+                        <p class="section-help" th:text="#{applicant.apply.availability.help}">Specify when you are available to work.</p>
+                        
+                        <div id="availabilities-container">
+                            <!-- Availability rows will be added here by JavaScript -->
+                        </div>
+                        
+                        <button type="button" class="btn btn-secondary" onclick="addAvailability()" th:text="#{applicant.apply.add.availability}">
+                            + Add Availability Period
+                        </button>
+                    </section>
+                    
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary" th:text="#{applicant.apply.submit}">
+                            Submit Application
+                        </button>
+                        <a th:href="@{/applicant/dashboard}" class="btn btn-secondary" th:text="#{applicant.apply.cancel}">Cancel</a>
+                    </div>
                 </form>
-                
-                <p class="back-link">
-                    <a th:href="@{/applicant/dashboard}" th:text="#{applicant.apply.back}">Back to Dashboard</a>
-                </p>
             </div>
         </main>
     </div>
+    
+    <script th:inline="javascript">
+        // Pass competences data from server to JavaScript
+        const competencesData = /*[[${competences}]]*/ [];
+        const labels = {
+            competence: /*[[#{applicant.apply.competence}]]*/ 'Competence',
+            selectCompetence: /*[[#{applicant.apply.select.competence}]]*/ 'Select competence...',
+            years: /*[[#{applicant.apply.years}]]*/ 'Years of Experience',
+            fromDate: /*[[#{applicant.apply.from.date}]]*/ 'From Date',
+            toDate: /*[[#{applicant.apply.to.date}]]*/ 'To Date',
+            remove: /*[[#{applicant.apply.remove}]]*/ 'Remove'
+        };
+        
+        let competenceIndex = 0;
+        let availabilityIndex = 0;
+        
+        function addCompetence() {
+            const container = document.getElementById('competences-container');
+            
+            // Build competence options HTML
+            let optionsHtml = `<option value="">${labels.selectCompetence}</option>`;
+            competencesData.forEach(comp => {
+                optionsHtml += `<option value="${comp.competenceId}">${comp.name}</option>`;
+            });
+            
+            const rowHtml = `
+                <div class="form-row competence-row">
+                    <div class="form-group">
+                        <label>${labels.competence}</label>
+                        <select name="competences[${competenceIndex}].competenceId" required>
+                            ${optionsHtml}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>${labels.years}</label>
+                        <input type="number" name="competences[${competenceIndex}].yearsOfExperience" 
+                               step="0.1" min="0" max="99" required placeholder="0.0">
+                    </div>
+                    <button type="button" class="btn btn-danger btn-small" onclick="removeRow(this)">${labels.remove}</button>
+                </div>
+            `;
+            
+            container.insertAdjacentHTML('beforeend', rowHtml);
+            competenceIndex++;
+        }
+        
+        function addAvailability() {
+            const container = document.getElementById('availabilities-container');
+            
+            const rowHtml = `
+                <div class="form-row availability-row">
+                    <div class="form-group">
+                        <label>${labels.fromDate}</label>
+                        <input type="date" name="availabilities[${availabilityIndex}].fromDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label>${labels.toDate}</label>
+                        <input type="date" name="availabilities[${availabilityIndex}].toDate" required>
+                    </div>
+                    <button type="button" class="btn btn-danger btn-small" onclick="removeRow(this)">${labels.remove}</button>
+                </div>
+            `;
+            
+            container.insertAdjacentHTML('beforeend', rowHtml);
+            availabilityIndex++;
+        }
+        
+        function removeRow(button) {
+            button.closest('.form-row').remove();
+        }
+        
+        // Add one row of each by default
+        document.addEventListener('DOMContentLoaded', function() {
+            addCompetence();
+            addAvailability();
+        });
+    </script>
 </body>
 </html>

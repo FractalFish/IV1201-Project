@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="#{applicant.status.title}">Application Status</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+    <div class="container">
+        <header class="dashboard-header">
+            <h1 th:text="#{applicant.status.heading}">Application Status</h1>
+            <div class="user-info">
+                <span th:text="${person.name + ' ' + person.surname}">User Name</span>
+                <form th:action="@{/logout}" method="post" class="logout-form">
+                    <button type="submit" th:text="#{home.logout}">Logout</button>
+                </form>
+            </div>
+        </header>
+        
+        <main>
+            <!-- Success message -->
+            <div th:if="${success}" class="alert alert-success">
+                <p th:text="#{applicant.apply.success}">Your application has been submitted successfully!</p>
+            </div>
+
+            <div class="status-card">
+                <!-- Application Status -->
+                <section class="status-section">
+                    <h2 th:text="#{applicant.status.current}">Current Status</h2>
+                    <div class="status-badge large" th:classappend="${application.status}">
+                        <span th:text="${application.status}">UNHANDLED</span>
+                    </div>
+                    <p class="status-date">
+                        <span th:text="#{applicant.status.submitted}">Submitted:</span>
+                        <span th:text="${#temporals.format(application.createdAt, 'yyyy-MM-dd HH:mm')}">2024-01-01</span>
+                    </p>
+                </section>
+                
+                <!-- Competences -->
+                <section class="details-section" th:if="${applicationDetails != null and !applicationDetails.competences.empty}">
+                    <h2 th:text="#{applicant.status.competences}">Your Competences</h2>
+                    <table class="details-table">
+                        <thead>
+                            <tr>
+                                <th th:text="#{applicant.status.competence.name}">Competence</th>
+                                <th th:text="#{applicant.status.competence.years}">Years of Experience</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="comp : ${applicationDetails.competences}">
+                                <td th:text="${comp.competenceName}">Ticket Sales</td>
+                                <td th:text="${comp.yearsOfExperience}">2.5</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </section>
+                
+                <!-- Availability -->
+                <section class="details-section" th:if="${applicationDetails != null and !applicationDetails.availabilities.empty}">
+                    <h2 th:text="#{applicant.status.availability}">Your Availability</h2>
+                    <table class="details-table">
+                        <thead>
+                            <tr>
+                                <th th:text="#{applicant.status.from.date}">From</th>
+                                <th th:text="#{applicant.status.to.date}">To</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="avail : ${applicationDetails.availabilities}">
+                                <td th:text="${avail.fromDate}">2024-06-01</td>
+                                <td th:text="${avail.toDate}">2024-08-31</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </section>
+                
+                <div class="back-link">
+                    <a th:href="@{/applicant/dashboard}" th:text="#{applicant.status.back}">Back to Dashboard</a>
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

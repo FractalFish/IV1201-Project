@@ -24,21 +24,26 @@
                 <p th:text="#{applicant.apply.success}">Your application has been submitted successfully!</p>
             </div>
             <!-- Show application status if exists -->
-            <div th:if="${application != null}" class="application-card">
-                <h2 th:text="#{applicant.dashboard.status}">Application Status</h2>
-                <div class="status-badge" th:classappend="${application.status}">
-                    <span th:text="${application.status}">UNHANDLED</span>
+            <th:block th:if="${appDetails != null}">
+                <div class="application-card">
+                    <h2 th:text="#{applicant.dashboard.status}">Application Status</h2>
+                    <div class="status-badge" th:classappend="${appDetails.status}">
+                        <span th:text="${appDetails.status}">UNHANDLED</span>
+                    </div>
+                    <p class="application-date">
+                        Submitted: <span th:text="${#temporals.format(appDetails.createdAt, 'yyyy-MM-dd HH:mm')}">2024-01-01</span>
+                    </p>
+                    <a th:href="@{/applicant/status}" class="btn btn-primary">View Details</a>
                 </div>
-                <p class="application-date">
-                    Submitted: <span th:text="${#temporals.format(application.createdAt, 'yyyy-MM-dd HH:mm')}">2024-01-01</span>
-                </p>
-            </div>
+            </th:block>
             
             <!-- Show option to apply if no application -->
-            <div th:if="${application == null}" class="no-application">
-                <p th:text="#{applicant.dashboard.no.application}">You haven't submitted an application yet.</p>
-                <a th:href="@{/applicant/apply}" class="btn" th:text="#{applicant.dashboard.apply}">Submit Application</a>
-            </div>
+            <th:block th:if="${appDetails == null}">
+                <div class="no-application">
+                    <p th:text="#{applicant.dashboard.no.application}">You haven't submitted an application yet.</p>
+                    <a th:href="@{/applicant/apply}" class="btn btn-primary" th:text="#{applicant.dashboard.apply}">Submit Application</a>
+                </div>
+            </th:block>
         </main>
     </div>
 </body>
