@@ -58,18 +58,19 @@ public class GlobalExceptionHandler {
 
     /**
      * Handles illegal state exceptions (business rule violations).
+     * Returns 409 Conflict since these represent state conflicts, not server errors.
      *
      * @param ex the exception
      * @param model the model for the view
      * @return the error view name
      */
     @ExceptionHandler(IllegalStateException.class)
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    @ResponseStatus(HttpStatus.CONFLICT)
     public String handleIllegalStateException(IllegalStateException ex, Model model) {
-        logger.error("Application state error: {}", ex.getMessage());
-        model.addAttribute("errorTitle", "Application Error");
-        model.addAttribute("errorMessage", "An unexpected error occurred. Please try again later.");
-        model.addAttribute("errorCode", 500);
+        logger.warn("Business rule violation: {}", ex.getMessage());
+        model.addAttribute("errorTitle", "Conflict Detected");
+        model.addAttribute("errorMessage", ex.getMessage());
+        model.addAttribute("errorCode", 409);
         return "error";
     }
 

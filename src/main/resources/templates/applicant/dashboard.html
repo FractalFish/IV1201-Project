@@ -19,6 +19,10 @@
         </header>
         
         <main>
+            <!-- Success message after application submission -->
+            <div th:if="${success}" class="alert alert-success">
+                <p th:text="#{applicant.apply.success}">Your application has been submitted successfully!</p>
+            </div>
             <!-- Show application status if exists -->
             <div th:if="${application != null}" class="application-card">
                 <h2 th:text="#{applicant.dashboard.status}">Application Status</h2>

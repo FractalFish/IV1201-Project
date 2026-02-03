@@ -26,7 +26,7 @@
                    th:text="#{recruiter.dashboard.all}">All</a>
                 <a th:each="status : ${statuses}" 
                    th:href="@{/recruiter/dashboard(status=${status})}"
-                   th:classappend="${currentFilter == status.name()} ? 'active' : ''"
+                   th:classappend="${currentFilter != null and currentFilter.toUpperCase() == status.name()} ? 'active' : ''"
                    th:text="${status}">STATUS</a>
             </div>
             

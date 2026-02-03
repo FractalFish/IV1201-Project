@@ -1,0 +1,16 @@
+The assignment consists of the development of one single application, and of a number of oral and written reports.
+
+1. Development
+The application that shall be developed is described here, application-description.pdf. The development is performed in groups of four, and is meant to correspond to the first iterations of a software project. The result shall be a complete architecture implemented in code. It is not intended that the product shall be ready for use, instead, you shall develop a code skeleton spanning all layers. The code shall be sufficiently complete to show how risks and issues have been solved. All code and configuration files of the application shall be available in a public git repository.
+
+1.1 SQL for Existing Database
+Section three in application-description.pdf and the Data Migration task in tasks-affecting-grade.pdf mention an SQL script that generates the existing database. That script is here, existing-database.sql. The script is made for PostgreSQL, and intended to be executed with psql. It might not work if executed with pgAdmin, or with another DBMS than PostgreSQL.
+
+2. Reporting
+There are four oral group reports, were all group members together present the application to an instructor, and to another project group. Each group's presentation will be followed by a discussion, where the instructor and the other group can ask questions and give comments. There are, however, no requirements on opposition from the group listening to the presentation. The requirements on the different oral reports can be found in tasks 35-38 in the document tasks-affecting-grade.pdf. You're free to choose yourself how you show that you meet the requirements.    
+
+You also have to submit a short (about 400 words) individual written report before each of these four oral group reports. Both oral and written reports are described under Reporting in the document tasks-affecting-grade.pdf Download tasks-affecting-grade.pdf. 
+
+There is also an individual final written report, which shall be submitted here, under this assignment. The final written report must follow this template, iv1201-report-template.pdf. Here is the latex file for the template, in case you want to write in latex, iv1201-report-template.tex
+3. Grading
+The grade is decided by the tasks specified in this document, tasks-affecting-grade.pdf. There are mandatory tasks, which must all be solved to pass the course, and tasks which contributes to a higher grade than E. To complete a task, it must be implemented in code, reported at one of the reporting meetings, and explained in the final individual written report. All group members get the same grade, provided everyone contributes to the development to about the same extent. The contribution to the codebase will be evaluated from the commit history of the git repository. The contribution to the architectural decisions will be decided from the written and oral presentations. If different group members want different grades, everyone shall contribute equally to the lowest of the group member's grades, and then only those who want a higher grade solve extra higher grade tasks. In this case, clearly state at both oral and written reports who has done what extra higher grade tasks.
