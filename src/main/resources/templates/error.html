@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="#{error.title}">Error</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+    <div class="container error-page">
+        <div class="error-icon">
+            <span th:text="${errorCode}" class="error-code">500</span>
+        </div>
+        
+        <h1 th:text="${errorTitle}" class="error-title">Something Went Wrong</h1>
+        
+        <p th:text="${errorMessage}" class="error-message">
+            An unexpected error occurred. Please try again later.
+        </p>
+        
+        <div class="error-actions">
+            <a th:href="@{/}" class="btn" th:text="#{error.home}">Go Home</a>
+            <a href="javascript:history.back()" class="btn btn-secondary" th:text="#{error.back}">Go Back</a>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="#{recruiter.dashboard.title}">Recruiter Dashboard</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+    <div class="container wide">
+        <header class="dashboard-header">
+            <h1 th:text="#{recruiter.dashboard.heading}">Applications</h1>
+            <div class="user-info">
+                <form th:action="@{/logout}" method="post" class="logout-form">
+                    <button type="submit" th:text="#{home.logout}">Logout</button>
+                </form>
+            </div>
+        </header>
+        
+        <main>
+            <!-- Filter controls -->
+            <div class="filter-controls">
+                <label th:text="#{recruiter.dashboard.filter}">Filter by Status:</label>
+                <a th:href="@{/recruiter/dashboard}" 
+                   th:classappend="${currentFilter == null} ? 'active' : ''"
+                   th:text="#{recruiter.dashboard.all}">All</a>
+                <a th:each="status : ${statuses}" 
+                   th:href="@{/recruiter/dashboard(status=${status})}"
+                   th:classappend="${currentFilter == status.name()} ? 'active' : ''"
+                   th:text="${status}">STATUS</a>
+            </div>
+            
+            <!-- Applications table -->
+            <div th:if="${!applications.isEmpty()}" class="applications-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th th:text="#{recruiter.dashboard.name}">Applicant Name</th>
+                            <th th:text="#{recruiter.dashboard.status}">Status</th>
+                            <th th:text="#{recruiter.dashboard.date}">Submitted</th>
+                            <th th:text="#{recruiter.dashboard.actions}">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="app : ${applications}">
+                            <td th:text="${app.person.name + ' ' + app.person.surname}">Name</td>
+                            <td>
+                                <span class="status-badge" th:classappend="${app.status}"
+                                      th:text="${app.status}">UNHANDLED</span>
+                            </td>
+                            <td th:text="${#temporals.format(app.createdAt, 'yyyy-MM-dd')}">2024-01-01</td>
+                            <td>
+                                <a th:href="@{/recruiter/application/{id}(id=${app.applicationId})}" 
+                                   class="btn btn-small" th:text="#{recruiter.dashboard.view}">View</a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- No applications message -->
+            <div th:if="${applications.isEmpty()}" class="no-applications">
+                <p th:text="#{recruiter.dashboard.no.applications}">No applications found.</p>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

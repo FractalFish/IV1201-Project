@@ -12,8 +12,8 @@ COPY mvnw .
 COPY .mvn .mvn
 COPY pom.xml .
 
-# Make mvnw executable and download dependencies
-RUN chmod +x mvnw && ./mvnw dependency:go-offline -B
+# Make mvnw executable (fix Windows CRLF line endings) and download dependencies
+RUN sed -i 's/\r$//' mvnw && chmod +x mvnw && ./mvnw dependency:go-offline -B
 
 # Copy source code and build
 COPY src src

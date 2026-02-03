@@ -1,0 +1,110 @@
+package com.iv1201.recruitment.controller;
+
+import jakarta.persistence.OptimisticLockException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.servlet.NoHandlerFoundException;
+
+/**
+ * Global exception handler for the application.
+ * Catches exceptions and displays user-friendly error pages.
+ * Never exposes stack traces to users.
+ */
+@ControllerAdvice
+public class GlobalExceptionHandler {
+
+    private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+
+    /**
+     * Handles concurrent modification conflicts (optimistic locking).
+     * This occurs when two recruiters try to update the same application.
+     *
+     * @param ex the exception
+     * @param model the model for the view
+     * @return the error view name
+     */
+    @ExceptionHandler({OptimisticLockException.class, ObjectOptimisticLockingFailureException.class})
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public String handleOptimisticLockException(Exception ex, Model model) {
+        logger.warn("Concurrent modification detected: {}", ex.getMessage());
+        model.addAttribute("errorTitle", "Conflict Detected");
+        model.addAttribute("errorMessage", "Another user has modified this record. Please refresh and try again.");
+        model.addAttribute("errorCode", 409);
+        return "error";
+    }
+
+    /**
+     * Handles illegal argument exceptions (validation failures).
+     *
+     * @param ex the exception
+     * @param model the model for the view
+     * @return the error view name
+     */
+    @ExceptionHandler(IllegalArgumentException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public String handleIllegalArgumentException(IllegalArgumentException ex, Model model) {
+        logger.warn("Invalid request: {}", ex.getMessage());
+        model.addAttribute("errorTitle", "Invalid Request");
+        model.addAttribute("errorMessage", ex.getMessage());
+        model.addAttribute("errorCode", 400);
+        return "error";
+    }
+
+    /**
+     * Handles illegal state exceptions (business rule violations).
+     *
+     * @param ex the exception
+     * @param model the model for the view
+     * @return the error view name
+     */
+    @ExceptionHandler(IllegalStateException.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public String handleIllegalStateException(IllegalStateException ex, Model model) {
+        logger.error("Application state error: {}", ex.getMessage());
+        model.addAttribute("errorTitle", "Application Error");
+        model.addAttribute("errorMessage", "An unexpected error occurred. Please try again later.");
+        model.addAttribute("errorCode", 500);
+        return "error";
+    }
+
+    /**
+     * Handles 404 not found errors.
+     *
+     * @param ex the exception
+     * @param model the model for the view
+     * @return the error view name
+     */
+    @ExceptionHandler(NoHandlerFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public String handleNotFoundException(NoHandlerFoundException ex, Model model) {
+        logger.debug("Page not found: {}", ex.getRequestURL());
+        model.addAttribute("errorTitle", "Page Not Found");
+        model.addAttribute("errorMessage", "The page you're looking for doesn't exist.");
+        model.addAttribute("errorCode", 404);
+        return "error";
+    }
+
+    /**
+     * Handles all other unexpected exceptions.
+     * Logs full details but shows generic message to user.
+     *
+     * @param ex the exception
+     * @param model the model for the view
+     * @return the error view name
+     */
+    @ExceptionHandler(Exception.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public String handleGenericException(Exception ex, Model model) {
+        logger.error("Unexpected error occurred", ex);
+        model.addAttribute("errorTitle", "Something Went Wrong");
+        model.addAttribute("errorMessage", "An unexpected error occurred. Please try again later.");
+        model.addAttribute("errorCode", 500);
+        return "error";
+    }
+}
