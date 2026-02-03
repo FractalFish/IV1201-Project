@@ -33,4 +33,11 @@ public interface AvailabilityRepository extends JpaRepository<Availability, Inte
      */
     List<Availability> findByFromDateLessThanEqualAndToDateGreaterThanEqual(
         LocalDate endDate, LocalDate startDate);
+
+    /**
+     * Deletes all availability periods for a specific person.
+     * 
+     * @param personId the ID of the person
+     */
+    void deleteByPersonPersonId(Integer personId);
 }
