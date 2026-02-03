@@ -1,7 +1,8 @@
 package com.iv1201.recruitment.controller;
 
-import com.iv1201.recruitment.domain.Application;
 import com.iv1201.recruitment.domain.ApplicationStatus;
+import com.iv1201.recruitment.domain.dto.ApplicationDetailsDTO;
+import com.iv1201.recruitment.domain.dto.ApplicationListDTO;
 import com.iv1201.recruitment.service.ApplicationService;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Controller;
@@ -34,21 +35,22 @@ public class RecruiterController {
      * @param model the model for the view
      * @return the recruiter dashboard view
      */
-    @GetMapping("/dashboard")
+    @GetMapping({"/dashboard", "/applications"})
     public String dashboard(@RequestParam(required = false) String status, Model model) {
-        List<Application> applications;
-        ApplicationStatus filterStatus = null;
+        List<ApplicationListDTO> applications;
         
         if (status != null && !status.isEmpty()) {
             try {
-                filterStatus = ApplicationStatus.valueOf(status.toUpperCase());
+                ApplicationStatus filterStatus = ApplicationStatus.valueOf(status.toUpperCase());
+                applications = applicationService.getApplicationsByStatus(filterStatus);
                 model.addAttribute("currentFilter", status);
             } catch (IllegalArgumentException e) {
-                // Invalid status, show all
+                applications = applicationService.getAllApplications();
             }
+        } else {
+            applications = applicationService.getAllApplications();
         }
         
-        applications = applicationService.getApplications(filterStatus);
         model.addAttribute("applications", applications);
         model.addAttribute("statuses", ApplicationStatus.values());
         
@@ -56,21 +58,21 @@ public class RecruiterController {
     }
 
     /**
-     * Displays the application detail page.
+     * Displays the application detail page with competences and availabilities.
      *
      * @param id the application ID
      * @param model the model for the view
      * @return the application detail view or redirect if not found
      */
-    @GetMapping("/application/{id}")
+    @GetMapping("/applications/{id}")
     public String viewApplication(@PathVariable("id") Integer id, Model model) {
-        Optional<Application> applicationOpt = applicationService.getApplicationById(id);
+        Optional<ApplicationDetailsDTO> detailsOpt = applicationService.getApplicationDetails(id);
         
-        if (applicationOpt.isEmpty()) {
-            return "redirect:/recruiter/dashboard";
+        if (detailsOpt.isEmpty()) {
+            return "redirect:/recruiter/applications";
         }
         
-        model.addAttribute("application", applicationOpt.get());
+        model.addAttribute("appDetails", detailsOpt.get());
         model.addAttribute("statuses", ApplicationStatus.values());
         
         return "recruiter/application-detail";
@@ -82,16 +84,18 @@ public class RecruiterController {
      *
      * @param id the application ID
      * @param status the new status
+     * @param version the expected version for optimistic locking
      * @param redirectAttributes for flash messages
      * @return redirect to application detail
      */
-    @PostMapping("/application/{id}/status")
+    @PostMapping("/applications/{id}/status")
     public String updateStatus(@PathVariable("id") Integer id,
                                @RequestParam("status") String status,
+                               @RequestParam(value = "version", required = false) Integer version,
                                RedirectAttributes redirectAttributes) {
         try {
             ApplicationStatus newStatus = ApplicationStatus.valueOf(status.toUpperCase());
-            applicationService.updateStatus(id, newStatus);
+            applicationService.updateApplicationStatus(id, newStatus, version);
             redirectAttributes.addFlashAttribute("success", true);
         } catch (ObjectOptimisticLockingFailureException e) {
             redirectAttributes.addFlashAttribute("conflict", true);
@@ -99,6 +103,6 @@ public class RecruiterController {
             redirectAttributes.addFlashAttribute("error", e.getMessage());
         }
         
-        return "redirect:/recruiter/application/" + id;
+        return "redirect:/recruiter/applications/" + id;
     }
 }
