@@ -1,0 +1,17 @@
+# Mark large SQL data files as generated (linguist-generated)
+# This excludes them from GitHub diff stats and language statistics
+project-docs/Course-Provided-instructions/existing-database.sql linguist-generated=true
+*.sql linguist-detectable=false
+
+# Ensure consistent line endings
+* text=auto
+*.java text eol=lf
+*.properties text eol=lf
+*.html text eol=lf
+*.css text eol=lf
+*.js text eol=lf
+*.sql text eol=lf
+*.xml text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.md text eol=lf
