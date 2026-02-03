@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="#{applicant.apply.title}">Submit Application</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+    <div class="container">
+        <header class="dashboard-header">
+            <h1 th:text="#{applicant.apply.heading}">Submit Application</h1>
+            <div class="user-info">
+                <span th:text="${person.name + ' ' + person.surname}">User Name</span>
+                <form th:action="@{/logout}" method="post" class="logout-form">
+                    <button type="submit" th:text="#{home.logout}">Logout</button>
+                </form>
+            </div>
+        </header>
+        
+        <main>
+            <div class="apply-card">
+                <p th:text="#{applicant.apply.instructions}">
+                    By submitting an application, you express your interest in working with us.
+                </p>
+                
+                <div class="person-info">
+                    <h3 th:text="#{applicant.apply.your.info}">Your Information</h3>
+                    <dl>
+                        <dt th:text="#{applicant.apply.name}">Name</dt>
+                        <dd th:text="${person.name + ' ' + person.surname}">John Doe</dd>
+                        
+                        <dt th:text="#{applicant.apply.email}">Email</dt>
+                        <dd th:text="${person.email ?: '-'}">email@example.com</dd>
+                        
+                        <dt th:text="#{applicant.apply.pnr}">Personal Number</dt>
+                        <dd th:text="${person.pnr ?: '-'}">12345678-1234</dd>
+                    </dl>
+                </div>
+                
+                <form th:action="@{/applicant/apply}" method="post" class="apply-form">
+                    <button type="submit" class="btn btn-primary" th:text="#{applicant.apply.submit}">
+                        Submit Application
+                    </button>
+                </form>
+                
+                <p class="back-link">
+                    <a th:href="@{/applicant/dashboard}" th:text="#{applicant.apply.back}">Back to Dashboard</a>
+                </p>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

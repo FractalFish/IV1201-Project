@@ -11,9 +11,11 @@ import org.springframework.stereotype.Service;
 
 import com.iv1201.recruitment.domain.Person;
 import com.iv1201.recruitment.repository.PersonRepository;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
- * Business logic layer - loads user from database for authentication
+ * Business logic layer - loads user from database for authentication.
+ * All methods are transactional for data consistency.
  */
 @Service
 public class AuthService implements UserDetailsService {
@@ -24,7 +26,15 @@ public class AuthService implements UserDetailsService {
         this.personRepository = personRepository;
     }
 
+    /**
+     * Loads user details for authentication.
+     *
+     * @param username the username to look up
+     * @return UserDetails for Spring Security
+     * @throws UsernameNotFoundException if user not found
+     */
     @Override
+    @Transactional(readOnly = true)
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         Person person = personRepository.findByUsername(username)
             .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
