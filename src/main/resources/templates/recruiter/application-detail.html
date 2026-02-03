@@ -39,48 +39,99 @@
                     <h2 th:text="#{recruiter.application.applicant}">Applicant</h2>
                     <dl>
                         <dt th:text="#{recruiter.dashboard.name}">Name</dt>
-                        <dd th:text="${application.person.name + ' ' + application.person.surname}">John Doe</dd>
+                        <dd th:text="${appDetails.personName}">John Doe</dd>
                         
                         <dt th:text="#{recruiter.application.email}">Email</dt>
-                        <dd th:text="${application.person.email ?: '-'}">email@example.com</dd>
+                        <dd th:text="${appDetails.personEmail ?: '-'}">email@example.com</dd>
                         
                         <dt th:text="#{recruiter.application.pnr}">Personal Number</dt>
-                        <dd th:text="${application.person.pnr ?: '-'}">12345678-1234</dd>
+                        <dd th:text="${appDetails.personPnr ?: '-'}">12345678-1234</dd>
                     </dl>
                 </section>
                 
-                <!-- Application Information -->
+                <!-- Application Status -->
                 <section class="application-info">
                     <h2 th:text="#{recruiter.application.status}">Status</h2>
-                    <div class="status-badge large" th:classappend="${application.status}">
-                        <span th:text="${application.status}">UNHANDLED</span>
+                    <div class="status-badge large" th:classappend="${appDetails.status}">
+                        <span th:text="${appDetails.status}">UNHANDLED</span>
                     </div>
                     
                     <dl>
                         <dt th:text="#{recruiter.application.submitted}">Submitted</dt>
-                        <dd th:text="${#temporals.format(application.createdAt, 'yyyy-MM-dd HH:mm')}">2024-01-01 12:00</dd>
+                        <dd th:text="${#temporals.format(appDetails.createdAt, 'yyyy-MM-dd HH:mm')}">2024-01-01 12:00</dd>
                         
                         <dt th:text="#{recruiter.application.updated}">Last Updated</dt>
-                        <dd th:text="${#temporals.format(application.updatedAt, 'yyyy-MM-dd HH:mm')}">2024-01-01 12:00</dd>
+                        <dd th:text="${#temporals.format(appDetails.updatedAt, 'yyyy-MM-dd HH:mm')}">2024-01-01 12:00</dd>
                     </dl>
+                </section>
+                
+                <!-- Competences -->
+                <section class="details-section" th:if="${appDetails.competences != null and !appDetails.competences.empty}">
+                    <h2 th:text="#{recruiter.application.competences}">Competences</h2>
+                    <table class="details-table">
+                        <thead>
+                            <tr>
+                                <th th:text="#{recruiter.application.competence.name}">Competence</th>
+                                <th th:text="#{recruiter.application.competence.years}">Years of Experience</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="comp : ${appDetails.competences}">
+                                <td th:text="${comp.competenceName}">Ticket Sales</td>
+                                <td th:text="${comp.yearsOfExperience}">2.5</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </section>
+                
+                <!-- No competences -->
+                <section class="details-section" th:if="${appDetails.competences == null or appDetails.competences.empty}">
+                    <h2 th:text="#{recruiter.application.competences}">Competences</h2>
+                    <p class="no-data" th:text="#{recruiter.application.no.competences}">No competences listed.</p>
+                </section>
+                
+                <!-- Availability -->
+                <section class="details-section" th:if="${appDetails.availabilities != null and !appDetails.availabilities.empty}">
+                    <h2 th:text="#{recruiter.application.availability}">Availability</h2>
+                    <table class="details-table">
+                        <thead>
+                            <tr>
+                                <th th:text="#{recruiter.application.from.date}">From</th>
+                                <th th:text="#{recruiter.application.to.date}">To</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="avail : ${appDetails.availabilities}">
+                                <td th:text="${avail.fromDate}">2024-06-01</td>
+                                <td th:text="${avail.toDate}">2024-08-31</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </section>
+                
+                <!-- No availability -->
+                <section class="details-section" th:if="${appDetails.availabilities == null or appDetails.availabilities.empty}">
+                    <h2 th:text="#{recruiter.application.availability}">Availability</h2>
+                    <p class="no-data" th:text="#{recruiter.application.no.availability}">No availability periods listed.</p>
                 </section>
                 
                 <!-- Status Update Form -->
                 <section class="status-update">
                     <h3 th:text="#{recruiter.application.update.status}">Update Status</h3>
-                    <form th:action="@{/recruiter/application/{id}/status(id=${application.applicationId})}" method="post" class="status-form">
+                    <form th:action="@{/recruiter/applications/{id}/status(id=${appDetails.applicationId})}" method="post" class="status-form">
+                        <input type="hidden" name="version" th:value="${appDetails.version}">
                         <select name="status" class="status-select">
                             <option th:each="status : ${statuses}" 
                                     th:value="${status}" 
                                     th:text="${status}"
-                                    th:selected="${status == application.status}">STATUS</option>
+                                    th:selected="${status == appDetails.status}">STATUS</option>
                         </select>
                         <button type="submit" class="btn btn-primary" th:text="#{recruiter.application.save}">Save</button>
                     </form>
                 </section>
                 
                 <div class="back-link">
-                    <a th:href="@{/recruiter/dashboard}" th:text="#{recruiter.application.back}">Back to Dashboard</a>
+                    <a th:href="@{/recruiter/applications}" th:text="#{recruiter.application.back}">Back to Dashboard</a>
                 </div>
             </div>
         </main>

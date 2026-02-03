@@ -21,11 +21,11 @@
             <!-- Filter controls -->
             <div class="filter-controls">
                 <label th:text="#{recruiter.dashboard.filter}">Filter by Status:</label>
-                <a th:href="@{/recruiter/dashboard}" 
+                <a th:href="@{/recruiter/applications}" 
                    th:classappend="${currentFilter == null} ? 'active' : ''"
                    th:text="#{recruiter.dashboard.all}">All</a>
                 <a th:each="status : ${statuses}" 
-                   th:href="@{/recruiter/dashboard(status=${status})}"
+                   th:href="@{/recruiter/applications(status=${status})}"
                    th:classappend="${currentFilter != null and currentFilter.toUpperCase() == status.name()} ? 'active' : ''"
                    th:text="${status}">STATUS</a>
             </div>
@@ -43,14 +43,14 @@
                     </thead>
                     <tbody>
                         <tr th:each="app : ${applications}">
-                            <td th:text="${app.person.name + ' ' + app.person.surname}">Name</td>
+                            <td th:text="${app.personName}">Name</td>
                             <td>
                                 <span class="status-badge" th:classappend="${app.status}"
                                       th:text="${app.status}">UNHANDLED</span>
                             </td>
                             <td th:text="${#temporals.format(app.createdAt, 'yyyy-MM-dd')}">2024-01-01</td>
                             <td>
-                                <a th:href="@{/recruiter/application/{id}(id=${app.applicationId})}" 
+                                <a th:href="@{/recruiter/applications/{id}(id=${app.applicationId})}" 
                                    class="btn btn-small" th:text="#{recruiter.dashboard.view}">View</a>
                             </td>
                         </tr>
