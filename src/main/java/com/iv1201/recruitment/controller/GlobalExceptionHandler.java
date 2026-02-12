@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.servlet.NoHandlerFoundException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 /**
  * Global exception handler for the application.
@@ -85,6 +86,16 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public String handleNotFoundException(NoHandlerFoundException ex, Model model) {
         logger.debug("Page not found: {}", ex.getRequestURL());
+        model.addAttribute("errorTitle", "Page Not Found");
+        model.addAttribute("errorMessage", "The page you're looking for doesn't exist.");
+        model.addAttribute("errorCode", 404);
+        return "error";
+    }
+
+    @ExceptionHandler(NoResourceFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public String handleResourceNotFoundException(NoResourceFoundException ex, Model model) {
+        logger.debug("Resource not found: {}", ex.getResourcePath());
         model.addAttribute("errorTitle", "Page Not Found");
         model.addAttribute("errorMessage", "The page you're looking for doesn't exist.");
         model.addAttribute("errorCode", 404);
