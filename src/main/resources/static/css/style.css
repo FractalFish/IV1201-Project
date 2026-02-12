@@ -506,3 +506,25 @@ dd {
         margin-top: 0.5rem;
     }
 }
+
+/* Field validation errors */
+.field-error {
+    display: block;
+    margin-top: 0.5rem;
+    padding: 0.75rem;
+    background-color: #fee2e2; /* Light red background */
+    color: #991b1b;            /* Dark red text */
+    border: 1px solid #fecaca; /* Red border */
+    border-radius: 0.375rem;
+    font-size: 0.875rem;
+}
+
+/* Success message box */
+.success-message {
+    padding: 1rem;
+    background-color: #dcfce7; /* Light green background */
+    color: #166534;            /* Dark green text */
+    border: 1px solid #bbf7d0; /* Green border */
+    border-radius: 0.375rem;
+    margin-bottom: 1rem;
+}
