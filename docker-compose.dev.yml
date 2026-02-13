@@ -14,7 +14,8 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data_dev:/var/lib/postgresql/data
-      - ./src/main/resources/db:/docker-entrypoint-initdb.d:ro
+      # Note: Database migrations are now handled by Flyway (automatic on app startup)
+      # Old init scripts have been moved to db/migration/ and run via Flyway
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME:-postgres} -d ${DB_NAME:-recruitment}"]
       interval: 10s
