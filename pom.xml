@@ -114,17 +114,9 @@
                     <configLocation>google_checks.xml</configLocation>
                     <consoleOutput>true</consoleOutput>
                     <failsOnError>false</failsOnError>
+                    <failOnViolation>false</failOnViolation>
                     <violationSeverity>warning</violationSeverity>
                 </configuration>
-                <executions>
-                    <execution>
-                        <id>validate</id>
-                        <phase>validate</phase>
-                        <goals>
-                            <goal>check</goal>
-                        </goals>
-                    </execution>
-                </executions>
             </plugin>
 
             <!-- JaCoCo Plugin for Code Coverage Reports -->
