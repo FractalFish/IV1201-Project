@@ -54,7 +54,8 @@ public class ApplicantController {
     @GetMapping("/dashboard")
     public String dashboard(Authentication authentication, Model model) {
         String username = authentication.getName();
-        logger.info("Dashboard requested by user: {}", username);
+        logger.info("Dashboard accessed by user: {}", username);
+        
         Optional<Person> personOpt = personRepository.findByUsername(username);
         
         if (personOpt.isEmpty()) {
@@ -63,23 +64,18 @@ public class ApplicantController {
         }
         
         Person person = personOpt.get();
-        logger.info("Found person: {} (id={})", person.getName(), person.getPersonId());
         model.addAttribute("person", person);
         
         Optional<Application> applicationOpt = applicationService.getApplicationByPerson(person);
-        logger.info("Application found: {}", applicationOpt.isPresent());
+        
         if (applicationOpt.isPresent()) {
             Application app = applicationOpt.get();
-            logger.info("Application details: id={}, status={}, createdAt={}", 
-                app.getApplicationId(), app.getStatus(), app.getCreatedAt());
+            logger.debug("User {} has existing application: id={}, status={}", 
+                username, app.getApplicationId(), app.getStatus());
             model.addAttribute("appDetails", app);
-            logger.info("Added application to model with applicationId={}", app.getApplicationId());
         } else {
-            logger.info("No application exists - user should see 'Submit Application' button");
+            logger.debug("User {} has no application", username);
         }
-        
-        // Debug: log what's in the model
-        logger.info("Model contains 'appDetails': {}", model.containsAttribute("appDetails"));
         
         return "applicant/dashboard";
     }
@@ -95,9 +91,12 @@ public class ApplicantController {
     @GetMapping("/apply")
     public String showApplyForm(Authentication authentication, Model model) {
         String username = authentication.getName();
+        logger.info("Application form accessed by user: {}", username);
+        
         Optional<Person> personOpt = personRepository.findByUsername(username);
         
         if (personOpt.isEmpty()) {
+            logger.warn("Person not found for username: {}", username);
             return "redirect:/login";
         }
         
@@ -105,6 +104,7 @@ public class ApplicantController {
         
         // Check if already has application - redirect to status page
         if (applicationService.hasApplication(person)) {
+            logger.info("User {} already has application, redirecting to status", username);
             return "redirect:/applicant/status";
         }
         
@@ -135,15 +135,20 @@ public class ApplicantController {
                                     RedirectAttributes redirectAttributes,
                                     Model model) {
         String username = authentication.getName();
+        logger.info("Application submission by user: {}", username);
+        
         Optional<Person> personOpt = personRepository.findByUsername(username);
         
         if (personOpt.isEmpty()) {
+            logger.warn("Person not found for username: {}", username);
             return "redirect:/login";
         }
         
         Person person = personOpt.get();
         
         if (bindingResult.hasErrors()) {
+            logger.debug("Application form has validation errors for user {}: {}", 
+                username, bindingResult.getAllErrors());
             model.addAttribute("person", person);
             model.addAttribute("competences", applicationService.getAllCompetences());
             return "applicant/apply";
@@ -151,12 +156,23 @@ public class ApplicantController {
         
         try {
             applicationService.submitApplication(person, form);
+            // Service already logged success, no need to log here
             redirectAttributes.addFlashAttribute("success", true);
             return "redirect:/applicant/status";
+            
         } catch (IllegalArgumentException e) {
+            // Service already logged the issue
             model.addAttribute("person", person);
             model.addAttribute("competences", applicationService.getAllCompetences());
             model.addAttribute("error", e.getMessage());
+            return "applicant/apply";
+            
+        } catch (Exception e) {
+            logger.error("Unexpected error during application submission for user {}: {}", 
+                username, e.getMessage(), e);
+            model.addAttribute("person", person);
+            model.addAttribute("competences", applicationService.getAllCompetences());
+            model.addAttribute("error", "An unexpected error occurred");
             return "applicant/apply";
         }
     }
@@ -171,9 +187,12 @@ public class ApplicantController {
     @GetMapping("/status")
     public String showStatus(Authentication authentication, Model model) {
         String username = authentication.getName();
+        logger.info("Application status page accessed by user: {}", username);
+        
         Optional<Person> personOpt = personRepository.findByUsername(username);
         
         if (personOpt.isEmpty()) {
+            logger.warn("Person not found for username: {}", username);
             return "redirect:/login";
         }
         
@@ -183,6 +202,7 @@ public class ApplicantController {
         Optional<Application> applicationOpt = applicationService.getApplicationByPerson(person);
         
         if (applicationOpt.isEmpty()) {
+            logger.info("No application found for user {}, redirecting to apply", username);
             return "redirect:/applicant/apply";
         }
         
