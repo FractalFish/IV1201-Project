@@ -2,6 +2,8 @@
 
 A recruitment system for managing job applications, built with Spring Boot.
 
+**Live Application:** https://iv1201-recruitment.azurewebsites.net/
+
 ## Team
 - Sarah
 - Khalil  
@@ -26,7 +28,7 @@ A recruitment system for managing job applications, built with Spring Boot.
 
 ### 1. Clone the repository
 ```bash
-git clone https://github.com/sarahsaleh00/IV1201-Project.git
+git clone https://github.com/FractalFish/IV1201-Project.git
 cd IV1201-Project
 ```
 
@@ -38,7 +40,7 @@ cp .env.example .env
 
 ### 3. Start the database
 ```bash
-docker-compose up -d
+docker compose up -d
 ```
 
 ### 4. Run the application
@@ -67,13 +69,13 @@ Open http://localhost:8080 in your browser.
 
 ### Stop database
 ```bash
-docker-compose down
+docker compose down
 ```
 
 ### Reset database (delete all data)
 ```bash
-docker-compose down -v
-docker-compose up -d
+docker compose down -v
+docker compose up -d
 ```
 
 ## Project Structure
@@ -88,9 +90,48 @@ src/main/java/com/iv1201/recruitment/
 └── util/            # Utilities (logging, etc.)
 ```
 
+## Development with Docker
+
+For development with live reload of templates and static files:
+
+```bash
+docker compose -f docker-compose.dev.yml up
+```
+
+Access at http://localhost:8080. Changes to HTML/CSS will be reflected immediately.
+
+## CI/CD & Deployment
+
+The project uses **GitHub Actions** for automated CI/CD:
+
+1. **Static Analysis** - Checkstyle for code quality
+2. **Unit Tests** - JUnit with JaCoCo coverage
+3. **Build** - Docker image pushed to GitHub Container Registry
+4. **Deploy** - Automatic deployment to Azure Web App (main branch only)
+
+**Production:** https://iv1201-recruitment.azurewebsites.net/
+
+Pipeline runs on every push. All tests must pass before deployment.
+
+## Database Migrations
+
+Database schema is managed with **Flyway**. Migrations run automatically when the app starts.
+
+Migration files: `src/main/resources/db/migration/`
+- `V1__schema.sql` - Initial schema and seed data
+- `V2__password_migration.sql` - BCrypt password hashing
+- `V3__application_table.sql` - Application submissions
+- `V4__test_data.sql` - Additional test data
+
 ## Environment Variables
 | Variable | Description | Default |
 |----------|-------------|---------|
 | DB_URL | PostgreSQL JDBC URL | jdbc:postgresql://localhost:5432/recruitment |
 | DB_USERNAME | Database username | postgres |
 | DB_PASSWORD | Database password | postgres |
+
+## Documentation
+
+- **HANDOVER.md** - Comprehensive handover documentation
+- **project-docs/ADR/** - Architecture Decision Records
+- **project-docs/reports/** - Technical reports and guides
