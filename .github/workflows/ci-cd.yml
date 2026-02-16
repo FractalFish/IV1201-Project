@@ -1,8 +1,7 @@
 name: CI/CD Pipeline
 
 on:
-  push:
-    branches: [ main, develop, feature/** ]
+  push:  # Runs on push to any branch
   pull_request:
     branches: [ main, develop ]
   workflow_dispatch:
