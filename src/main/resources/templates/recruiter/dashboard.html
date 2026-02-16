@@ -41,8 +41,8 @@
                             <th th:text="#{recruiter.dashboard.actions}">Actions</th>
                         </tr>
                     </thead>
-                    <tbody>
-                        <tr th:each="app : ${applications}">
+                    <tbody id="applicationsTableBody">
+                        <tr th:each="app : ${applications}" class="application-row">
                             <td th:text="${app.personName}">Name</td>
                             <td>
                                 <span class="status-badge" th:classappend="${app.status}"
@@ -61,6 +61,46 @@
             <!-- No applications message -->
             <div th:if="${applications.isEmpty()}" class="no-applications">
                 <p th:text="#{recruiter.dashboard.no.applications}">No applications found.</p>
+            </div>
+            
+            <!-- Pagination Controls -->
+            <div th:if="${totalPages > 1}" class="pagination">
+                <!-- Previous Button -->
+                <a th:if="${hasPrevious}" 
+                   th:href="@{/recruiter/applications(page=${currentPage - 1}, status=${currentFilter})}"
+                   class="btn btn-secondary"
+                   th:text="#{recruiter.dashboard.previous}">Previous</a>
+                <button th:unless="${hasPrevious}" 
+                        class="btn btn-secondary" 
+                        disabled
+                        th:text="#{recruiter.dashboard.previous}">Previous</button>
+                
+                <!-- Page Info -->
+                <span class="page-info">
+                    <span th:text="#{recruiter.dashboard.page}">Page</span>
+                    <span th:text="${currentPage + 1}">1</span>
+                    <span th:text="#{recruiter.dashboard.of}">of</span>
+                    <span th:text="${totalPages}">10</span>
+                </span>
+                
+                <!-- Next Button -->
+                <a th:if="${hasNext}" 
+                   th:href="@{/recruiter/applications(page=${currentPage + 1}, status=${currentFilter})}"
+                   class="btn btn-secondary"
+                   th:text="#{recruiter.dashboard.next}">Next</a>
+                <button th:unless="${hasNext}" 
+                        class="btn btn-secondary" 
+                        disabled
+                        th:text="#{recruiter.dashboard.next}">Next</button>
+            </div>
+            
+            <!-- Showing X of Y -->
+            <div class="pagination-info">
+                <span th:text="#{recruiter.dashboard.showing}">Showing</span>
+                <span th:text="${applications.size()}">10</span>
+                <span th:text="#{recruiter.dashboard.of}">of</span>
+                <span th:text="${totalElements}">100</span>
+                <span th:text="#{recruiter.dashboard.applications}">applications</span>
             </div>
         </main>
     </div>

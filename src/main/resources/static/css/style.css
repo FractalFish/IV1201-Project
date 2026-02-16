@@ -108,6 +108,41 @@ body {
     font-size: 0.75rem;
 }
 
+.btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.btn.loading {
+    opacity: 0.7;
+}
+
+/* Pagination */
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 2rem;
+    padding: 1rem 0;
+}
+
+.pagination .btn {
+    min-width: 100px;
+}
+
+.pagination .page-info {
+    font-weight: 500;
+    color: var(--gray-700);
+}
+
+.pagination-info {
+    text-align: center;
+    margin-top: 0.5rem;
+    color: var(--gray-500);
+    font-size: 0.875rem;
+}
+
 /* Cards */
 .apply-card,
 .status-card,
