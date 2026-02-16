@@ -9,6 +9,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
@@ -99,6 +100,25 @@ public class GlobalExceptionHandler {
         model.addAttribute("errorTitle", "Page Not Found");
         model.addAttribute("errorMessage", "The page you're looking for doesn't exist.");
         model.addAttribute("errorCode", 404);
+        return "error";
+    }
+
+    /**
+     * Handles invalid URL parameters (e.g., text where a number is expected).
+     * Returns 400 Bad Request for invalid input types.
+     *
+     * @param ex the exception
+     * @param model the model for the view
+     * @return the error view name
+     */
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public String handleTypeMismatch(MethodArgumentTypeMismatchException ex, Model model) {
+        logger.warn("Invalid argument type for parameter '{}': expected {}, got '{}'",
+                ex.getName(), ex.getRequiredType(), ex.getValue());
+        model.addAttribute("errorTitle", "Invalid Input");
+        model.addAttribute("errorMessage", "The provided input is not valid. Please check the URL and try again.");
+        model.addAttribute("errorCode", 400);
         return "error";
     }
 

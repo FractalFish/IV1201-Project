@@ -4,6 +4,9 @@ import com.iv1201.recruitment.domain.ApplicationStatus;
 import com.iv1201.recruitment.domain.dto.ApplicationDetailsDTO;
 import com.iv1201.recruitment.domain.dto.ApplicationListDTO;
 import com.iv1201.recruitment.service.ApplicationService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
@@ -33,37 +36,46 @@ public class RecruiterController {
     }
 
     /**
-     * Displays the recruiter dashboard with a list of applications.
-     * Supports filtering by application status.
+     * Displays the recruiter dashboard with a paginated list of applications.
+     * Supports filtering by application status and page navigation.
      *
+     * @param page the page number to display (0-based, defaults to 0)
      * @param status optional filter for application status
      * @param model the model for the view
      * @return the recruiter dashboard view
      */
     @GetMapping({"/dashboard", "/applications"})
-    public String dashboard(@RequestParam(required = false) String status, Model model, Authentication authentication) {
+    public String dashboard(@RequestParam(defaultValue = "0") int page,
+                           @RequestParam(required = false) String status,
+                           Model model, Authentication authentication) {
         String username = authentication.getName();
         logger.info("Recruiter dashboard accessed by user: {}", username);
         
-        List<ApplicationListDTO> applications;
+        Pageable pageable = PageRequest.of(page, 10);
+        Page<ApplicationListDTO> applications;
         
         if (status != null && !status.isEmpty()) {
             try {
                 ApplicationStatus filterStatus = ApplicationStatus.valueOf(status.toUpperCase());
-                applications = applicationService.getApplicationsByStatus(filterStatus);
+                applications = applicationService.getApplicationsByStatus(filterStatus, pageable);
                 model.addAttribute("currentFilter", status);
-                logger.info("Dashboard filtered by status: {}, found {} applications", filterStatus, applications.size());
+                logger.info("Dashboard filtered by status: {}, found {} applications", filterStatus, applications.getTotalElements());
             } catch (IllegalArgumentException e) {
                 logger.warn("Invalid status filter attempted: {}", status);
-                applications = applicationService.getAllApplications();
+                applications = applicationService.getAllApplications(pageable);
             }
         } else {
-            applications = applicationService.getAllApplications();
-            logger.info("Dashboard showing all applications: {} total", applications.size());
+            applications = applicationService.getAllApplications(pageable);
+            logger.info("Dashboard showing all applications: {} total", applications.getTotalElements());
         }
         
-        model.addAttribute("applications", applications);
+        model.addAttribute("applications", applications.getContent());
         model.addAttribute("statuses", ApplicationStatus.values());
+        model.addAttribute("currentPage", applications.getNumber());
+        model.addAttribute("totalPages", applications.getTotalPages());
+        model.addAttribute("hasNext", applications.hasNext());
+        model.addAttribute("hasPrevious", applications.hasPrevious());
+        model.addAttribute("totalElements", applications.getTotalElements());
         
         return "recruiter/dashboard";
     }

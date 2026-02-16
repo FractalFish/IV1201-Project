@@ -3,6 +3,8 @@ package com.iv1201.recruitment.repository;
 import com.iv1201.recruitment.domain.Application;
 import com.iv1201.recruitment.domain.ApplicationStatus;
 import com.iv1201.recruitment.domain.Person;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -46,6 +48,23 @@ public interface ApplicationRepository extends JpaRepository<Application, Intege
      * @return list of all applications
      */
     List<Application> findAllByOrderByCreatedAtDesc();
+
+    /**
+     * Finds all applications ordered by creation date (newest first) with pagination.
+     *
+     * @param pageable pagination information
+     * @return page of applications
+     */
+    Page<Application> findAllByOrderByCreatedAtDesc(Pageable pageable);
+
+    /**
+     * Finds all applications with a specific status with pagination.
+     *
+     * @param status the application status
+     * @param pageable pagination information
+     * @return page of applications with that status
+     */
+    Page<Application> findByStatus(ApplicationStatus status, Pageable pageable);
 
     /**
      * Checks if an application exists for a person.
