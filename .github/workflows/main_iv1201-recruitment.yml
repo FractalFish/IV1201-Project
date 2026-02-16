@@ -13,8 +13,8 @@ jobs:
   build:
     runs-on: ubuntu-latest
     permissions:
-      id-token: write #This is required for requesting the JWT
       contents: read #This is required for actions/checkout
+      packages: : write #This is required for requesting the JWT
 
     steps:
       - uses: actions/checkout@v4
@@ -63,3 +63,4 @@ jobs:
           images: 'ghcr.io/${{ secrets.AZUREAPPSERVICE_CONTAINERUSERNAME_3548D34497534A98817553B21495E73E }}/fractalfish/iv1201-project:${{ github.sha }}'
 
           
+
