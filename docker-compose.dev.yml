@@ -1,5 +1,5 @@
 # Development docker-compose with live reload for static resources (CSS, JS, templates)
-# Usage: docker compose -f docker-compose.dev.yml up -d --build
+# Usage: docker compose -f docker-compose.dev.yml up
 
 services:
   db:
