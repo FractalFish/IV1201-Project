@@ -126,9 +126,6 @@ jobs:
     permissions:
       id-token: write
       contents: read
-    environment:
-      name: 'Production'
-      url: https://iv1201-recruitment.azurewebsites.net
 
     steps:
       - name: Lowercase the repo name
