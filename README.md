@@ -15,9 +15,13 @@ A recruitment system for managing job applications, built with Spring Boot.
 - Spring Boot 3.4
 - Spring Security
 - Spring Data JPA
+- Spring Validation
 - Thymeleaf
 - PostgreSQL 16
+- Flyway (Database migrations)
 - Maven
+- Docker & Docker Compose
+- GitHub Actions (CI/CD)
 
 ## Prerequisites
 - Java 21 (JDK)
@@ -38,24 +42,29 @@ cp .env.example .env
 # Edit .env if you want to change default credentials
 ```
 
-### 3. Start the database
+### 3. Start the application with Docker
 ```bash
 docker compose up -d
 ```
 
-### 4. Run the application
-```bash
-./mvnw spring-boot:run
-```
-On Windows:
-```bash
-mvnw.cmd spring-boot:run
-```
+This starts both the PostgreSQL database and the Spring Boot application.
 
-### 5. Access the application
+### 4. Access the application
 Open http://localhost:8080 in your browser.
 
 ## Development
+
+### Run with live reload (recommended for development)
+```bash
+docker compose -f docker-compose.dev.yml up
+```
+Changes to HTML/CSS/JS files will be reflected immediately without restart.
+
+### Run without Docker (requires local PostgreSQL)
+```bash
+./mvnw spring-boot:run
+```
+On Windows: `mvnw.cmd spring-boot:run`
 
 ### Build
 ```bash
@@ -67,7 +76,7 @@ Open http://localhost:8080 in your browser.
 ./mvnw test
 ```
 
-### Stop database
+### Stop application
 ```bash
 docker compose down
 ```
@@ -84,21 +93,16 @@ src/main/java/com/iv1201/recruitment/
 ├── config/          # Security, web configuration
 ├── controller/      # HTTP request handlers
 ├── service/         # Business logic
-├── repository/      # Data access layer
-├── domain/          # JPA entities
-│   └── dto/         # Data transfer objects
+├── repository/      # Data access layer (JPA repositories)
+├── domain/          # JPA entities and DTOs
 └── util/            # Utilities (logging, etc.)
+
+src/main/resources/
+├── db/migration/    # Flyway database migrations
+├── static/          # CSS, JavaScript, images
+├── templates/       # Thymeleaf HTML templates
+└── application.properties
 ```
-
-## Development with Docker
-
-For development with live reload of templates and static files:
-
-```bash
-docker compose -f docker-compose.dev.yml up
-```
-
-Access at http://localhost:8080. Changes to HTML/CSS will be reflected immediately.
 
 ## CI/CD & Deployment
 
