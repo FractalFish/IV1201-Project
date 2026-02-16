@@ -9,6 +9,15 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.List;
+
+
+
 /**
  * Service for handling user registration.
  * Creates new applicant accounts with hashed passwords.
@@ -16,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class RegistrationService {
     
+    private static final Logger logger = LoggerFactory.getLogger(RegistrationService.class);
     private static final String APPLICANT_ROLE = "applicant";
     
     private final PersonRepository personRepository;
@@ -47,14 +57,41 @@ public class RegistrationService {
      */
     @Transactional
     public Person registerApplicant(RegistrationForm form) {
-        validateUniqueUsername(form.getUsername());
-        validateUniqueEmail(form.getEmail());
+
+        logger.info("Registration attempt for username: {}, email: {}", form.getUsername(), form.getEmail());    
+        
+    try {
+
+
+        List<String> errors = new ArrayList<>();
+
+        if (personRepository.existsByUsername(form.getUsername())) {
+            errors.add("Username already exists");
+        }
+
+        if (form.getEmail() != null && !form.getEmail().isBlank() 
+            && personRepository.existsByEmail(form.getEmail())) {
+            errors.add("Email already registered");
+        }
+
+        if (!errors.isEmpty()) {
+            String errorMessage = String.join(", ", errors);
+            logger.warn("Registration validation failed for username '{}': {}", 
+               form.getUsername(), errorMessage);
+            throw new IllegalArgumentException(errorMessage);
+        }
+
+
+    
         
         Role applicantRole = roleRepository.findByName(APPLICANT_ROLE);
-        if (applicantRole == null) {
+        if  (applicantRole == null) {
+            logger.error("System configuration error: applicant role '{}' not found in database", APPLICANT_ROLE);
             throw new IllegalStateException("Applicant role not found in database");
         }
         
+
+        logger.debug("Creating new person for username: {}", form.getUsername());
         Person person = new Person();
         person.setUsername(form.getUsername());
         person.setPassword(passwordEncoder.encode(form.getPassword()));
@@ -64,7 +101,18 @@ public class RegistrationService {
         person.setEmail(form.getEmail());
         person.setRole(applicantRole);
         
-        return personRepository.save(person);
+        Person savedPerson = personRepository.save(person);
+        logger.info("Successfully registered new applicant: username={}, personId={}", 
+                savedPerson.getUsername(), savedPerson.getPersonId());
+        return savedPerson;
+        } 
+        catch (IllegalArgumentException e) {
+            throw e;
+        } 
+        catch (Exception e) {
+            logger.error("Unexpected error during registration for username '{}': {}", form.getUsername(), e.getMessage(), e);
+            throw e;
+        }
     }
     
     /**
@@ -87,15 +135,4 @@ public class RegistrationService {
         return email != null && !email.isBlank() && personRepository.existsByEmail(email);
     }
     
-    private void validateUniqueUsername(String username) {
-        if (personRepository.existsByUsername(username)) {
-            throw new IllegalArgumentException("Username already exists");
-        }
-    }
-    
-    private void validateUniqueEmail(String email) {
-        if (email != null && !email.isBlank() && personRepository.existsByEmail(email)) {
-            throw new IllegalArgumentException("Email already registered");
-        }
-    }
 }

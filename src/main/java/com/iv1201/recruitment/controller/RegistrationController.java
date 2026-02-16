@@ -65,27 +65,17 @@ public class RegistrationController {
             return "register";
         }
         
-        // Check for duplicate username
-        if (registrationService.isUsernameTaken(form.getUsername())) {
-            bindingResult.rejectValue("username", "error.username.taken", "Username already exists");
-            return "register";
-        }
-        
-        // Check for duplicate email
-        if (registrationService.isEmailTaken(form.getEmail())) {
-            bindingResult.rejectValue("email", "error.email.taken", "Email already registered");
-            return "register";
-        }
-        
         try {
             registrationService.registerApplicant(form);
-            logger.info("Successfully registered new user: {}", form.getUsername());
             redirectAttributes.addFlashAttribute("successMessage", "Registration successful! Please login.");
             return "redirect:/login";
+        } catch (IllegalArgumentException e) {
+            bindingResult.reject("error.registration.failed", e.getMessage());
+            return "register";
         } catch (Exception e) {
-            logger.error("Registration failed for user: {}", form.getUsername(), e);
+            logger.error("Unexpected registration error for user '{}': {}", form.getUsername(), e.getMessage(), e);
             bindingResult.reject("error.registration.failed", "Registration failed. Please try again.");
             return "register";
-        }
+}
     }
 }

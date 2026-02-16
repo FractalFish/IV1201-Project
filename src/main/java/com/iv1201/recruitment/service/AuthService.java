@@ -13,6 +13,10 @@ import com.iv1201.recruitment.domain.Person;
 import com.iv1201.recruitment.repository.PersonRepository;
 import org.springframework.transaction.annotation.Transactional;
 
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * Business logic layer - loads user from database for authentication.
  * All methods are transactional for data consistency.
@@ -20,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class AuthService implements UserDetailsService {
 
+    private static final Logger logger = LoggerFactory.getLogger(AuthService.class);
     private final PersonRepository personRepository;
 
     public AuthService(PersonRepository personRepository) {
@@ -36,8 +41,16 @@ public class AuthService implements UserDetailsService {
     @Override
     @Transactional(readOnly = true)
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        logger.info("Authentication attempt for username: {}", username);
+
+    try {
         Person person = personRepository.findByUsername(username)
-            .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
+            .orElseThrow(() -> {
+            logger.warn("Authentication failed: User not found - username: {}", username);
+            return new UsernameNotFoundException("User not found: " + username);
+            });
+        
+        logger.info("User loaded for authentication: username={}, role={}",person.getUsername(), person.getRole().getName()); 
 
         return new User(
             person.getUsername(),
@@ -46,5 +59,15 @@ public class AuthService implements UserDetailsService {
                 new SimpleGrantedAuthority("ROLE_" + person.getRole().getName().toUpperCase())
             )
         );
+
+    } catch (UsernameNotFoundException e) {
+        // Already logged, just rethrow
+        throw e;
+    } catch (Exception e) {
+        logger.error("Unexpected error during authentication for username '{}': {}", 
+                    username, e.getMessage(), e);
+        throw e;
+    }
     }
 }
+    

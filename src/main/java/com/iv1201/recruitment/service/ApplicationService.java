@@ -68,31 +68,44 @@ public class ApplicationService {
      */
     @Transactional
     public Application submitApplication(Person person, ApplicationFormDTO form) {
+        logger.info("Submitting application for person: personId={}, username={}", 
+            person.getPersonId(), person.getUsername());
+        
         // Delete existing competence profiles and availabilities
         competenceProfileRepository.deleteByPersonPersonId(person.getPersonId());
         availabilityRepository.deleteByPersonPersonId(person.getPersonId());
+        logger.debug("Cleared existing competence profiles and availabilities for personId={}", person.getPersonId());
 
         // Create new competence profiles
+        int competenceCount = 0;
         if (form.getCompetences() != null) {
             for (CompetenceForm cf : form.getCompetences()) {
                 if (cf.getCompetenceId() != null && cf.getYearsOfExperience() != null) {
                     Competence competence = competenceRepository.findById(cf.getCompetenceId())
-                            .orElseThrow(() -> new IllegalArgumentException("Invalid competence ID: " + cf.getCompetenceId()));
+                            .orElseThrow(() -> {
+                                logger.warn("Invalid competence ID attempted: {}", cf.getCompetenceId());
+                                return new IllegalArgumentException("Invalid competence ID: " + cf.getCompetenceId());
+                            });
                     
                     CompetenceProfile profile = new CompetenceProfile();
                     profile.setPerson(person);
                     profile.setCompetence(competence);
                     profile.setYearsOfExperience(cf.getYearsOfExperience());
                     competenceProfileRepository.save(profile);
+                    competenceCount++;
                 }
             }
         }
+        logger.info("Created {} competence profiles for personId={}", competenceCount, person.getPersonId());
 
         // Create new availabilities
+        int availabilityCount = 0;
         if (form.getAvailabilities() != null) {
             for (AvailabilityForm af : form.getAvailabilities()) {
                 if (af.getFromDate() != null && af.getToDate() != null) {
                     if (!af.isValid()) {
+                        logger.warn("Invalid date range in application: fromDate={}, toDate={}", 
+                            af.getFromDate(), af.getToDate());
                         throw new IllegalArgumentException("Invalid date range: toDate must be after fromDate");
                     }
                     
@@ -101,15 +114,21 @@ public class ApplicationService {
                     availability.setFromDate(af.getFromDate());
                     availability.setToDate(af.getToDate());
                     availabilityRepository.save(availability);
+                    availabilityCount++;
                 }
             }
         }
+        logger.info("Created {} availabilities for personId={}", availabilityCount, person.getPersonId());
 
         // Create or update application
         Application application = applicationRepository.findByPerson(person)
                 .orElse(new Application(person));
         
-        return applicationRepository.save(application);
+        Application savedApplication = applicationRepository.save(application);
+        logger.info("Application saved successfully: applicationId={}, personId={}, username={}", 
+            savedApplication.getApplicationId(), person.getPersonId(), person.getUsername());
+        
+        return savedApplication;
     }
 
     /**
