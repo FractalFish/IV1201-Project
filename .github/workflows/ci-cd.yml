@@ -89,24 +89,24 @@ jobs:
     permissions:
       contents: read
       packages: write
-
+    
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
+      
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
-
+      
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ github.token }}
-
+      
       - name: Lowercase the repo name
         run: echo "REPO=${GITHUB_REPOSITORY,,}" >>${GITHUB_ENV}
-
+      
       - name: Build and push container image
         uses: docker/build-push-action@v5
         with:
@@ -116,34 +116,3 @@ jobs:
             ghcr.io/${{ env.REPO }}:latest
           file: ./Dockerfile
 
-  # Job 4: Deploy to Azure Web App
-  # remove 
-  deploy:
-    name: Deploy to Azure
-    runs-on: ubuntu-latest
-    needs: build
-    if: (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/docs/reorganize-and-fix-readme') && github.event_name == 'push'
-    permissions:
-      id-token: write
-      contents: read
-
-    steps:
-      - name: Lowercase the repo name
-        run: echo "REPO=${GITHUB_REPOSITORY,,}" >>${GITHUB_ENV}
-
-      - name: Login to Azure
-        uses: azure/login@v2
-        with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_991D3325112E4B2A856081B83E4620B5 }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_951D989011CC4751B2AA9E1505BDBD51 }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_9F71A4E190D6424A91D458611E840AFA }}
-
-      - name: Deploy to Azure Web App
-        uses: azure/webapps-deploy@v2
-        with:
-          app-name: 'iv1201-recruitment'
-          slot-name: 'Production'
-          images: 'ghcr.io/${{ env.REPO }}:${{ github.sha }}'
-
-      - name: Azure logout
-        run: az logout
