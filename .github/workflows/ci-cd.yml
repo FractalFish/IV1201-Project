@@ -122,16 +122,20 @@ jobs:
     name: Deploy to Azure
     runs-on: ubuntu-latest
     needs: build
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    if: (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/docs/reorganize-and-fix-readme') && github.event_name == 'push'
     permissions:
       contents: none
     environment:
       name: 'Production'
-      url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
-    
+      url: https://iv1201-recruitment.azurewebsites.net
+
     steps:
       - name: Lowercase the repo name
         run: echo "REPO=${GITHUB_REPOSITORY,,}" >>${GITHUB_ENV}
-      
+
       - name: Deploy to Azure Web App
-        run: curl -X POST "${{ secrets.AZURE_WEBHOOK_URL }}"
+        uses: azure/webapps-deploy@v2
+        with:
+          app-name: 'iv1201-recruitment'
+          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+          images: 'ghcr.io/${{ env.REPO }}:${{ github.sha }}'
