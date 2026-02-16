@@ -5,6 +5,8 @@ import com.iv1201.recruitment.domain.dto.*;
 import com.iv1201.recruitment.repository.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -225,6 +227,18 @@ public class ApplicationService {
     }
 
     /**
+     * Retrieves all applications as page of DTOs with pagination.
+     *
+     * @param pageable pagination information
+     * @return page of application list DTOs
+     */
+    @Transactional(readOnly = true)
+    public Page<ApplicationListDTO> getAllApplications(Pageable pageable) {
+        return applicationRepository.findAllByOrderByCreatedAtDesc(pageable)
+                .map(this::toListDTO);
+    }
+
+    /**
      * Retrieves applications filtered by status.
      *
      * @param status the status filter
@@ -235,6 +249,19 @@ public class ApplicationService {
         return applicationRepository.findByStatus(status).stream()
                 .map(this::toListDTO)
                 .collect(Collectors.toList());
+    }
+
+    /**
+     * Retrieves applications filtered by status with pagination.
+     *
+     * @param status the status filter
+     * @param pageable pagination information
+     * @return page of application list DTOs with that status
+     */
+    @Transactional(readOnly = true)
+    public Page<ApplicationListDTO> getApplicationsByStatus(ApplicationStatus status, Pageable pageable) {
+        return applicationRepository.findByStatus(status, pageable)
+                .map(this::toListDTO);
     }
 
     /**
