@@ -5,18 +5,25 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
 import com.iv1201.recruitment.service.AuthService;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * Security configuration - enables login with BCrypt password hashing
+ * and role-based access control.
  */
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
+
+    private static final Logger logger = LoggerFactory.getLogger(SecurityConfig.class);
     
     private final AuthService authService;
     
@@ -49,17 +56,65 @@ public class SecurityConfig {
             )
             .formLogin(form -> form
                 .loginPage("/login")
-                .defaultSuccessUrl("/", true)
+                // success handler to log successful logins
+                .successHandler((request, response, authentication) -> {
+                    logger.info("Login successful: user={}, role={}", 
+                        authentication.getName(), 
+                        authentication.getAuthorities());
+                    response.sendRedirect("/");
+                })
+                // failure handler to log failed login attempts
+                .failureHandler((request, response, exception) -> {
+                    String username = request.getParameter("username");
+                    logger.warn("Login failed: username={}, reason={}", 
+                        username != null ? username : "unknown", 
+                        exception.getMessage());
+                    response.sendRedirect("/login?error");
+                })
                 .permitAll()
             )
+            // logout handler to log successful logouts
             .logout(logout -> logout
-                .logoutSuccessUrl("/login?logout")
+                .logoutSuccessHandler((request, response, authentication) -> {
+                    if (authentication != null) {
+                        logger.info("User logged out: {}", authentication.getName());
+                    }
+                    response.sendRedirect("/login?logout");
+                })
                 .permitAll()
+            )
+            // Access denied handler to redirect and log unauthorized access attempts
+            .exceptionHandling(ex -> ex
+                .accessDeniedHandler((request, response, accessDeniedException) -> {
+                    var auth = SecurityContextHolder.getContext().getAuthentication();
+                    
+                    // if user is authenticated but access is denied then it is redirected to their correct dashboard
+                    if (auth != null && auth.isAuthenticated()) {
+                        String username = auth.getName();
+                        logger.warn("Access denied: user={}, attempted_url={}", 
+                            username, request.getRequestURI());
+                        
+                        // Redirect to appropriate dashboard based on role
+                        boolean isRecruiter = auth.getAuthorities().stream()
+                            .anyMatch(a -> a.getAuthority().equals("ROLE_RECRUITER"));
+                        // if rectruiter --> redirect to rectruiter dashboard 
+                        if (isRecruiter) {
+                            logger.debug("Redirecting recruiter '{}' to recruiter dashboard", username);
+                            response.sendRedirect("/recruiter/dashboard");
+                            // if applicant --> redirect to applicant dashboard 
+                        } else {
+                            logger.debug("Redirecting applicant '{}' to applicant dashboard", username);
+                            response.sendRedirect("/applicant/dashboard");
+                        }
+                        // // if user is not authenticated/annonymus --> redirect to login page 
+                    } else {
+                        logger.warn("Access denied: user=anonymous, attempted_url={}", 
+                            request.getRequestURI());
+                        response.sendRedirect("/login?error");
+                    }
+                })
             );
         
         return http.build();
     }
 }
-
-
-
