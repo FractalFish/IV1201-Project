@@ -265,21 +265,6 @@ public class ApplicationService {
     }
 
     /**
-     * Retrieves all applications, optionally filtered by status.
-     * Returns Application entities for backward compatibility.
-     *
-     * @param status the status filter, or null for all applications
-     * @return list of applications
-     */
-    @Transactional(readOnly = true)
-    public List<Application> getApplications(ApplicationStatus status) {
-        if (status != null) {
-            return applicationRepository.findByStatus(status);
-        }
-        return applicationRepository.findAllByOrderByCreatedAtDesc();
-    }
-
-    /**
      * Updates the status of an application with optimistic locking.
      *
      * @param applicationId the application ID
@@ -303,20 +288,6 @@ public class ApplicationService {
     }
 
     /**
-     * Updates the status of an application.
-     * Uses optimistic locking via @Version to prevent concurrent modifications.
-     *
-     * @param applicationId the application ID
-     * @param newStatus the new status
-     * @return the updated application
-     * @throws IllegalArgumentException if application not found
-     */
-    @Transactional
-    public Application updateStatus(Integer applicationId, ApplicationStatus newStatus) {
-        return updateApplicationStatus(applicationId, newStatus, null);
-    }
-
-    /**
      * Checks if a person already has an application.
      *
      * @param person the person to check
@@ -325,37 +296,6 @@ public class ApplicationService {
     @Transactional(readOnly = true)
     public boolean hasApplication(Person person) {
         return applicationRepository.existsByPerson(person);
-    }
-
-    /**
-     * Converts an Application to ApplicationDetailsDTO.
-     */
-    private ApplicationDetailsDTO toDetailsDTO(Application app) {
-        ApplicationDetailsDTO dto = new ApplicationDetailsDTO();
-        dto.setApplicationId(app.getApplicationId());
-        dto.setPersonName(app.getPerson().getName() + " " + app.getPerson().getSurname());
-        dto.setPersonEmail(app.getPerson().getEmail());
-        dto.setPersonPnr(app.getPerson().getPnr());
-        dto.setStatus(app.getStatus());
-        dto.setCreatedAt(app.getCreatedAt());
-        dto.setUpdatedAt(app.getUpdatedAt());
-        dto.setVersion(app.getVersion());
-
-        // Get competence profiles
-        List<CompetenceProfile> profiles = competenceProfileRepository
-                .findByPersonPersonId(app.getPerson().getPersonId());
-        dto.setCompetences(profiles.stream()
-                .map(p -> new CompetenceDetailDTO(p.getCompetence().getName(), p.getYearsOfExperience()))
-                .collect(Collectors.toList()));
-
-        // Get availabilities
-        List<Availability> availabilities = availabilityRepository
-                .findByPersonPersonId(app.getPerson().getPersonId());
-        dto.setAvailabilities(availabilities.stream()
-                .map(a -> new AvailabilityDetailDTO(a.getFromDate(), a.getToDate()))
-                .collect(Collectors.toList()));
-
-        return dto;
     }
 
     /**

@@ -77,26 +77,19 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * Handles 404 not found errors.
+     * Handles 404 not found errors from various sources.
      *
      * @param ex the exception
      * @param model the model for the view
      * @return the error view name
      */
-    @ExceptionHandler(NoHandlerFoundException.class)
+    @ExceptionHandler({NoHandlerFoundException.class, NoResourceFoundException.class})
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public String handleNotFoundException(NoHandlerFoundException ex, Model model) {
-        logger.debug("Page not found: {}", ex.getRequestURL());
-        model.addAttribute("errorTitle", "Page Not Found");
-        model.addAttribute("errorMessage", "The page you're looking for doesn't exist.");
-        model.addAttribute("errorCode", 404);
-        return "error";
-    }
-
-    @ExceptionHandler(NoResourceFoundException.class)
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    public String handleResourceNotFoundException(NoResourceFoundException ex, Model model) {
-        logger.debug("Resource not found: {}", ex.getResourcePath());
+    public String handleNotFoundException(Exception ex, Model model) {
+        String resourcePath = ex instanceof NoResourceFoundException 
+            ? ((NoResourceFoundException) ex).getResourcePath()
+            : ((NoHandlerFoundException) ex).getRequestURL();
+        logger.debug("Resource not found: {}", resourcePath);
         model.addAttribute("errorTitle", "Page Not Found");
         model.addAttribute("errorMessage", "The page you're looking for doesn't exist.");
         model.addAttribute("errorCode", 404);
