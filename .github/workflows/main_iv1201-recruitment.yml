@@ -84,10 +84,100 @@ jobs:
           retention-days: 30
           if-no-files-found: ignore
 
+  # Cross-browser testing
+  cross-browser-test:
+    name: Cross-Browser Testing
+    runs-on: ubuntu-latest
+    needs: test
+    
+    services:
+      # PostgreSQL for the application
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: recruitment
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: maven
+      
+      # Start Selenium Grid containers
+      - name: Start Selenium Grid
+        run: docker-compose -f docker-compose.selenium.yml up -d
+      
+      - name: Wait for Selenium Grid to be ready
+        run: |
+          echo "Waiting for Selenium Grid..."
+          sleep 10
+          for i in {1..30}; do
+            if curl -sSf http://localhost:4444/status > /dev/null 2>&1; then
+              echo "Chrome Selenium is ready"
+              break
+            fi
+            sleep 1
+          done
+      
+      # Start application in background
+      - name: Start Spring Boot application
+        run: |
+          export DB_URL=jdbc:postgresql://localhost:5432/recruitment
+          export DB_USERNAME=postgres
+          export DB_PASSWORD=postgres
+          ./mvnw spring-boot:run &
+          echo "Waiting for application to start..."
+          sleep 30
+          for i in {1..30}; do
+            if curl -sSf http://localhost:8080 > /dev/null 2>&1; then
+              echo "Application is ready"
+              break
+            fi
+            sleep 2
+          done
+      
+      # Run cross-browser tests
+      - name: Test on Chrome
+        run: ./mvnw test -Dtest=CrossBrowserTest -Dbrowser=chrome
+      
+      - name: Test on Firefox
+        run: ./mvnw test -Dtest=CrossBrowserTest -Dbrowser=firefox
+      
+      - name: Test on Edge
+        run: ./mvnw test -Dtest=CrossBrowserTest -Dbrowser=edge
+      
+      # Upload test results
+      - name: Upload browser test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: cross-browser-test-results
+          path: target/surefire-reports/
+          retention-days: 30
+      
+      # Cleanup
+      - name: Stop Selenium Grid
+        if: always()
+        run: docker-compose -f docker-compose.selenium.yml down
+
   # Build only runs if tests pass
   build:
     runs-on: ubuntu-latest
-    needs: [test, static-analysis]
+    needs: [test, static-analysis, cross-browser-test]
     permissions:
       contents: read
       packages: write
