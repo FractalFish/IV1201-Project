@@ -1,0 +1,48 @@
+version: '3.8'
+
+services:
+  # Chrome browser for Selenium testing
+  selenium-chrome:
+    image: selenium/standalone-chrome:latest
+    container_name: selenium-chrome
+    ports:
+      - "4444:4444"
+      - "7900:7900"  # VNC port for viewing browser (optional)
+    shm_size: 2gb
+    environment:
+      - SE_NODE_MAX_SESSIONS=5
+      - SE_NODE_SESSION_TIMEOUT=300
+    networks:
+      - test-network
+
+  # Firefox browser for Selenium testing
+  selenium-firefox:
+    image: selenium/standalone-firefox:latest
+    container_name: selenium-firefox
+    ports:
+      - "4445:4444"
+      - "7901:7900"  # VNC port for viewing browser (optional)
+    shm_size: 2gb
+    environment:
+      - SE_NODE_MAX_SESSIONS=5
+      - SE_NODE_SESSION_TIMEOUT=300
+    networks:
+      - test-network
+
+  # Edge browser for Selenium testing
+  selenium-edge:
+    image: selenium/standalone-edge:latest
+    container_name: selenium-edge
+    ports:
+      - "4446:4444"
+      - "7902:7900"  # VNC port for viewing browser (optional)
+    shm_size: 2gb
+    environment:
+      - SE_NODE_MAX_SESSIONS=5
+      - SE_NODE_SESSION_TIMEOUT=300
+    networks:
+      - test-network
+
+networks:
+  test-network:
+    driver: bridge
