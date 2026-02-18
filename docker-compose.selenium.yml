@@ -1,45 +1,59 @@
 version: '3.8'
 
 services:
-  # Chrome browser for Selenium testing
-  selenium-chrome:
-    image: selenium/standalone-chrome:latest
-    container_name: selenium-chrome
+  # Selenium Grid Hub
+  selenium-hub:
+    image: selenium/hub:4.25.0
+    container_name: selenium-hub
     ports:
       - "4444:4444"
-      - "7900:7900"  # VNC port for viewing browser
-    shm_size: 2gb
-    environment:
-      - SE_NODE_MAX_SESSIONS=5
-      - SE_NODE_SESSION_TIMEOUT=300
+      - "4442:4442"
+      - "4443:4443"
     networks:
       - test-network
 
-  # Firefox browser for Selenium testing
-  selenium-firefox:
-    image: selenium/standalone-firefox:latest
+  # Chrome Node 
+  chrome:
+    image: selenium/node-chrome:4.25.0
+    container_name: selenium-chrome
+    depends_on:
+      - selenium-hub
+    shm_size: 2gb
+    environment:
+      - SE_EVENT_BUS_HOST=selenium-hub
+      - SE_EVENT_BUS_PUBLISH_PORT=4442
+      - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
+      - SE_NODE_MAX_SESSIONS=5
+    networks:
+      - test-network
+
+  # Firefox Node
+  firefox:
+    image: selenium/node-firefox:4.25.0
     container_name: selenium-firefox
-    ports:
-      - "4445:4444"
-      - "7901:7900"  # VNC port for viewing browser
+    depends_on:
+      - selenium-hub
     shm_size: 2gb
     environment:
+      - SE_EVENT_BUS_HOST=selenium-hub
+      - SE_EVENT_BUS_PUBLISH_PORT=4442
+      - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
       - SE_NODE_MAX_SESSIONS=5
-      - SE_NODE_SESSION_TIMEOUT=300
     networks:
       - test-network
 
-  # Edge browser for Selenium testing
-  selenium-edge:
-    image: selenium/standalone-edge:latest
+  # Edge Node 
+  edge:
+    image: selenium/node-edge:4.25.0
     container_name: selenium-edge
-    ports:
-      - "4446:4444"
-      - "7902:7900"  # VNC port for viewing browser
+    depends_on:
+      - selenium-hub
     shm_size: 2gb
     environment:
+      - SE_EVENT_BUS_HOST=selenium-hub
+      - SE_EVENT_BUS_PUBLISH_PORT=4442
+      - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
       - SE_NODE_MAX_SESSIONS=5
-      - SE_NODE_SESSION_TIMEOUT=300
     networks:
       - test-network
 

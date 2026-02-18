@@ -61,29 +61,29 @@ public abstract class CrossBrowserTestBase {
         try {
             switch (browser) {
                 case "chrome":
-                    ChromeOptions chromeOptions = new ChromeOptions(); 
+                    ChromeOptions chromeOptions = new ChromeOptions();
                     driver = new RemoteWebDriver(
                         new URL("http://localhost:4444"),
                         chromeOptions
                     );
                     break;
-                    
+
                 case "firefox":
                     FirefoxOptions firefoxOptions = new FirefoxOptions();
                     driver = new RemoteWebDriver(
-                        new URL("http://localhost:4445"),
+                        new URL("http://localhost:4444"),
                         firefoxOptions
                     );
                     break;
-                    
+
                 case "edge":
                     EdgeOptions edgeOptions = new EdgeOptions();
                     driver = new RemoteWebDriver(
-                        new URL("http://localhost:4446"),
+                        new URL("http://localhost:4444"),
                         edgeOptions
                     );
                     break;
-                    
+
                 default:
                     throw new IllegalArgumentException("Unsupported browser: " + browser);
             }
