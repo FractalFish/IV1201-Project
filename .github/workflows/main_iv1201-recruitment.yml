@@ -6,7 +6,7 @@ name: Build and deploy container app to Azure Web App - iv1201-recruitment
 on:
   push:
     branches:
-      - main
+      - '**'
   workflow_dispatch:
 
 jobs:
@@ -202,12 +202,13 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           context: .
-          push: true
+          push: ${{ github.ref == 'refs/heads/main' }}
           tags: ghcr.io/${{ env.REPO }}:${{ github.sha }}
           file: ./Dockerfile
 
   deploy:
     runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
     permissions:
       id-token: write
       contents: read
