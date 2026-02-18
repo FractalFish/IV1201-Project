@@ -162,25 +162,20 @@ public class CrossBrowserTest extends CrossBrowserTestBase {
      */
     @Test
     public void testNavigation() {
-        // Start at home page
+        // Start at home page, expect redirect to /login
         driver.get(baseUrl + "/");
-        String homeUrl = driver.getCurrentUrl();
-        
-        // Try to navigate to login page
-        driver.get(baseUrl + "/login");
-        String loginUrl = driver.getCurrentUrl();
-        
-        // Verify navigation worked
-        assertNotEquals(homeUrl, loginUrl, "Should navigate to different page");
-        assertTrue(loginUrl.contains("/login"), "Should be on login page");
-        
-        // Navigate to register page
+        String redirectedUrl = driver.getCurrentUrl();
+        assertTrue(redirectedUrl.contains("/login"), "Unauthenticated access to / should redirect to /login");
+
+        // Navigate to register page from login
         driver.get(baseUrl + "/register");
         String registerUrl = driver.getCurrentUrl();
-        
-        // Verify navigation worked
-        assertNotEquals(loginUrl, registerUrl, "Should navigate to different page");
         assertTrue(registerUrl.contains("/register"), "Should be on register page");
+
+        // Navigate back to login
+        driver.get(baseUrl + "/login");
+        String loginUrl = driver.getCurrentUrl();
+        assertTrue(loginUrl.contains("/login"), "Should be on login page");
     }
     
     /**
@@ -243,25 +238,24 @@ public class CrossBrowserTest extends CrossBrowserTestBase {
      */
     @Test
     public void testBrowserNavigation() {
-        // Navigate through multiple pages
+        // Navigate to home page, expect redirect to /login
         driver.get(baseUrl + "/");
-        driver.get(baseUrl + "/login");
+        String loginUrl = driver.getCurrentUrl();
+        assertTrue(loginUrl.contains("/login"), "Unauthenticated access to / should redirect to /login");
+
+        // Navigate to register page
         driver.get(baseUrl + "/register");
-        
+        String registerUrl = driver.getCurrentUrl();
+        assertTrue(registerUrl.contains("/register"), "Should be on register page");
+
         // Go back to login
         driver.navigate().back();
-        assertTrue(driver.getCurrentUrl().contains("/login"), "Back button should work");
-        
-        // Go back to home
-        driver.navigate().back();
-        String homeUrl = driver.getCurrentUrl();
-        assertTrue(
-            homeUrl.equals(baseUrl + "/") || homeUrl.equals(baseUrl),
-            "Should navigate back to home"
-        );
-        
-        // Go forward to login
+        String backToLoginUrl = driver.getCurrentUrl();
+        assertTrue(backToLoginUrl.contains("/login"), "Back button should return to login page");
+
+        // Go forward to register
         driver.navigate().forward();
-        assertTrue(driver.getCurrentUrl().contains("/login"), "Forward button should work");
+        String forwardToRegisterUrl = driver.getCurrentUrl();
+        assertTrue(forwardToRegisterUrl.contains("/register"), "Forward button should return to register page");
     }
 }
