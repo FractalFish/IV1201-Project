@@ -7,7 +7,7 @@ services:
     container_name: selenium-chrome
     ports:
       - "4444:4444"
-      - "7900:7900"  # VNC port for viewing browser (optional)
+      - "7900:7900"  # VNC port for viewing browser
     shm_size: 2gb
     environment:
       - SE_NODE_MAX_SESSIONS=5
@@ -21,7 +21,7 @@ services:
     container_name: selenium-firefox
     ports:
       - "4445:4444"
-      - "7901:7900"  # VNC port for viewing browser (optional)
+      - "7901:7900"  # VNC port for viewing browser
     shm_size: 2gb
     environment:
       - SE_NODE_MAX_SESSIONS=5
@@ -35,7 +35,7 @@ services:
     container_name: selenium-edge
     ports:
       - "4446:4444"
-      - "7902:7900"  # VNC port for viewing browser (optional)
+      - "7902:7900"  # VNC port for viewing browser
     shm_size: 2gb
     environment:
       - SE_NODE_MAX_SESSIONS=5
