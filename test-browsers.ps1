@@ -1,25 +1,18 @@
-# Script to run cross-browser tests
-# Note: Make sure Docker is running and app is started on localhost:8080 first
+# Instructions:
 
-Write-Host "Starting Selenium containers..."
-docker-compose -f docker-compose.selenium.yml up -d
+#1. docker compose up db -d
 
-# Give containers time to start up
-Write-Host "Waiting for containers to be ready..."
-Start-Sleep -Seconds 10
+#2. .\mvnw.cmd spring-boot:run
 
-# Run tests for each browser
-Write-Host "Running Chrome tests..."
-.\mvnw.cmd test -Dtest=CrossBrowserTest -Dbrowser=chrome
-
-Write-Host "Running Firefox tests..."
-.\mvnw.cmd test -Dtest=CrossBrowserTest -Dbrowser=firefox
+#3. .\test_browser.ps1
 
 Write-Host "Running Edge tests..."
-.\mvnw.cmd test -Dtest=CrossBrowserTest -Dbrowser=edge
+.\mvnw.cmd test "-Dtest=CrossBrowserTest" "-Dbrowser=edge" "-Dtest.mode=local" "-Dsurefire.excludes=none"
 
-# Clean up containers
-Write-Host "Stopping containers..."
-docker-compose -f docker-compose.selenium.yml down
+Write-Host "Running Chrome tests..."
+.\mvnw.cmd test "-Dtest=CrossBrowserTest" "-Dbrowser=chrome" "-Dtest.mode=local" "-Dsurefire.excludes=none"
+
+Write-Host "Running Firefox tests..."
+.\mvnw.cmd test "-Dtest=CrossBrowserTest" "-Dbrowser=firefox" "-Dtest.mode=local" "-Dsurefire.excludes=none"
 
 Write-Host "Done!"

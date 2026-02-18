@@ -1,6 +1,5 @@
 package com.iv1201.recruitment.browser;
 
-import io.github.bonigarcia.wdm.WebDriverManager;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.openqa.selenium.WebDriver;
@@ -19,68 +18,64 @@ import java.time.Duration;
 /**
  * Base class for cross-browser testing.
  * Handles WebDriver setup and teardown for Chrome, Firefox, and Edge.
- * 
- * Run tests with: mvn test -Dtest=CrossBrowserTest -Dbrowser=chrome
- * Available browsers: chrome, firefox, edge
- * Test mode: local (uses Docker containers) or installed (uses local browsers)
+ * Supports local mode (Selenium Manager) and Docker/CI mode (remote containers).
  */
 public abstract class CrossBrowserTestBase {
-    
+
     protected WebDriver driver;
-    protected String baseUrl = "http://host.docker.internal:8080";
-    
-    /**
-     * Setup browser based on system properties.
-     * 
-     * Properties:
-     * - browser: chrome, firefox, or edge (default: chrome)
-     * - test.mode: docker (use containers) or local (use installed browsers)
-     */
-    @BeforeEach 
+    protected String baseUrl;
+
+    @BeforeEach
     public void setUp() {
         String browser = System.getProperty("browser", "chrome").toLowerCase();
         String testMode = System.getProperty("test.mode", "docker").toLowerCase();
-        
-        // Setup WebDriver based on test mode (docker or local)
-        if ("docker".equals(testMode)) {
-            setupDockerBrowser(browser);
-        } else {
-            setupLocalBrowser(browser);
+
+        // EdgeDriver on Windows 
+        if (System.getenv("SE_MSEDGEDRIVER_MIRROR_URL") == null) {
+            System.setProperty("SE_MSEDGEDRIVER_MIRROR_URL",
+                    "https://msedgedriver.microsoft.com");
         }
-        
-        // Set implicit wait for elements
+
+        baseUrl = System.getProperty("app.url", "http://localhost:8080");
+
+        if ("local".equals(testMode)) {
+            setupLocalBrowser(browser);
+        } else {
+            setupDockerBrowser(browser);
+        }
+
         driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
         driver.manage().timeouts().pageLoadTimeout(Duration.ofSeconds(30));
         driver.manage().window().maximize();
     }
-    
-    /**
-     * Setup browser using Docker Selenium containers.
-     */
+
+    // CLI mode connect to Selenium Grid
     private void setupDockerBrowser(String browser) {
+        String seleniumHost = System.getProperty("selenium.host", "localhost");
+
         try {
             switch (browser) {
                 case "chrome":
-                    ChromeOptions chromeOptions = new ChromeOptions();
+                    ChromeOptions chromeOpts = new ChromeOptions();
                     driver = new RemoteWebDriver(
-                        new URL("http://localhost:4444"),
-                        chromeOptions
+                        new URL("http://" + seleniumHost + ":4444"),
+                        chromeOpts
                     );
                     break;
 
                 case "firefox":
-                    FirefoxOptions firefoxOptions = new FirefoxOptions();
+                    FirefoxOptions firefoxOpts = new FirefoxOptions(); 
                     driver = new RemoteWebDriver(
-                        new URL("http://localhost:4444"),
-                        firefoxOptions
+                        new URL("http://" + seleniumHost + ":4445"),
+                        firefoxOpts
                     );
                     break;
 
                 case "edge":
-                    EdgeOptions edgeOptions = new EdgeOptions();
+                    EdgeOptions edgeOpts = new EdgeOptions();
                     driver = new RemoteWebDriver(
-                        new URL("http://localhost:4444"),
-                        edgeOptions
+                        new URL("http://" + seleniumHost + ":4446"),
+                        edgeOpts
                     );
                     break;
 
@@ -91,45 +86,38 @@ public abstract class CrossBrowserTestBase {
             throw new RuntimeException("Failed to connect to Selenium Grid", e);
         }
     }
-    
-    /**
-     * Setup browser using locally installed browsers.
-     */
+
+    //Local mode  
     private void setupLocalBrowser(String browser) {
-        baseUrl = "http://localhost:8080"; // Use localhost for local testing
-        
         switch (browser) {
             case "chrome":
-                WebDriverManager.chromedriver().setup();
-                ChromeOptions chromeOptions = new ChromeOptions();
-                chromeOptions.addArguments("--headless"); 
-                chromeOptions.addArguments("--no-sandbox");
-                chromeOptions.addArguments("--disable-dev-shm-usage"); 
-                driver = new ChromeDriver(chromeOptions);
+                ChromeOptions chromeOpts = new ChromeOptions();
+                chromeOpts.addArguments("--headless=new");
+                chromeOpts.addArguments("--no-sandbox");
+                chromeOpts.addArguments("--disable-dev-shm-usage");
+                driver = new ChromeDriver(chromeOpts);
                 break;
-                
+
             case "firefox":
-                WebDriverManager.firefoxdriver().setup();
-                FirefoxOptions firefoxOptions = new FirefoxOptions();
-                firefoxOptions.addArguments("--headless");
-                driver = new FirefoxDriver(firefoxOptions);
+                FirefoxOptions firefoxOpts = new FirefoxOptions();
+                firefoxOpts.addArguments("--headless");
+                driver = new FirefoxDriver(firefoxOpts);
                 break;
-                
+
             case "edge":
-                WebDriverManager.edgedriver().setup();
-                EdgeOptions edgeOptions = new EdgeOptions();
-                edgeOptions.addArguments("--headless");
-                driver = new EdgeDriver(edgeOptions);
+                EdgeOptions edgeOpts = new EdgeOptions();
+                edgeOpts.addArguments("--headless=new");
+                edgeOpts.addArguments("--no-sandbox");
+                edgeOpts.addArguments("--disable-dev-shm-usage");
+                driver = new EdgeDriver(edgeOpts);
                 break;
-                
+
             default:
                 throw new IllegalArgumentException("Unsupported browser: " + browser);
         }
     }
-    
-    /**
-     * Cleanup after each test.
-     */
+
+    //Close browser after test
     @AfterEach
     public void tearDown() {
         if (driver != null) {
