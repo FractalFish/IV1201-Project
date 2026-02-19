@@ -44,18 +44,11 @@ public class SecurityConfig {
             if (cause instanceof DatabaseUnavailableException ||
                 cause instanceof org.springframework.dao.DataAccessException ||
                 cause instanceof org.springframework.transaction.CannotCreateTransactionException ||
-                cause instanceof org.springframework.transaction.TransactionSystemException) {
-                return true;
-            }
-            // Check for common database error messages
-            String message = cause.getMessage();
-            if (message != null && (
-                message.contains("Connection refused") ||
-                message.contains("Connection timed out") ||
-                message.contains("Connection closed") ||
-                message.contains("Communications link failure") ||
-                message.contains("Connection pool exhausted") ||
-                message.contains("Cannot get a connection"))) {
+                cause instanceof org.springframework.transaction.TransactionSystemException ||
+                cause instanceof org.springframework.security.authentication.InternalAuthenticationServiceException ||
+                cause instanceof java.sql.SQLTransientConnectionException ||
+                cause instanceof java.sql.SQLNonTransientConnectionException ||
+                cause instanceof java.sql.SQLException) {
                 return true;
             }
             cause = cause.getCause();

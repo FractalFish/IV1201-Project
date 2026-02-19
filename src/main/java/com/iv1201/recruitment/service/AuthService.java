@@ -39,6 +39,7 @@ public class AuthService implements UserDetailsService {
      * @param username the username to look up
      * @return UserDetails for Spring Security
      * @throws UsernameNotFoundException if user not found
+     * @throws DatabaseUnavailableException if the database cannot be reached
      */
     @Override
     @Transactional(readOnly = true)
