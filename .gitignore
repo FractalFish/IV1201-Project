@@ -18,7 +18,9 @@ target/
 Thumbs.db
 
 # Logs
+logs/
 *.log
+*.logs
 
 # Environment
 .env

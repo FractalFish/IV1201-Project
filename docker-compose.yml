@@ -29,6 +29,8 @@ services:
       DB_PASSWORD: ${DB_PASSWORD:-postgres}
     ports:
       - "8080:8080"
+    volumes:                        
+      - ./logs:/app/logs            
     depends_on:
       db:
         condition: service_healthy
