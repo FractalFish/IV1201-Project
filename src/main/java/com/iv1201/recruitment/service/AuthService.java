@@ -10,7 +10,9 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import com.iv1201.recruitment.domain.Person;
+import com.iv1201.recruitment.exception.DatabaseUnavailableException;
 import com.iv1201.recruitment.repository.PersonRepository;
+import org.springframework.dao.DataAccessException;
 import org.springframework.transaction.annotation.Transactional;
 
 
@@ -63,6 +65,10 @@ public class AuthService implements UserDetailsService {
     } catch (UsernameNotFoundException e) {
         // Already logged, just rethrow
         throw e;
+    } catch (DataAccessException e) {
+        logger.error("Database unavailable during authentication for username '{}': {}", 
+                    username, e.getMessage());
+        throw new DatabaseUnavailableException("Database is temporarily unavailable. Please try again later.", e);
     } catch (Exception e) {
         logger.error("Unexpected error during authentication for username '{}': {}", 
                     username, e.getMessage(), e);

@@ -3,7 +3,10 @@ package com.iv1201.recruitment.controller;
 import jakarta.persistence.OptimisticLockException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
+import org.springframework.transaction.CannotCreateTransactionException;
+import org.springframework.transaction.TransactionSystemException;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -112,6 +115,24 @@ public class GlobalExceptionHandler {
         model.addAttribute("errorTitle", "Invalid Input");
         model.addAttribute("errorMessage", "The provided input is not valid. Please check the URL and try again.");
         model.addAttribute("errorCode", 400);
+        return "error";
+    }
+
+    /**
+     * Handles database access exceptions (database unavailable, connection timeout, etc.).
+     * Returns 503 Service Unavailable for database connectivity issues.
+     *
+     * @param ex the exception
+     * @param model the model for the view
+     * @return the error view name
+     */
+    @ExceptionHandler({DataAccessException.class, CannotCreateTransactionException.class, TransactionSystemException.class})
+    @ResponseStatus(HttpStatus.SERVICE_UNAVAILABLE)
+    public String handleDatabaseException(Exception ex, Model model) {
+        logger.error("Database error occurred: {}", ex.getMessage());
+        model.addAttribute("errorTitle", "Service Temporarily Unavailable");
+        model.addAttribute("errorMessage", "The database is currently unavailable. Please try again later.");
+        model.addAttribute("errorCode", 503);
         return "error";
     }
 
