@@ -15,12 +15,12 @@
             <p th:text="${successMessage}">Success</p>
         </div>
         
-    <div th:if="${param.error}" class="error-message">
-        <p th:text="#{login.error}">Invalid username or password.</p>
-    </div>
-    <div th:if="${param.dbError}" class="error-message">
-        <p th:text="#{login.dbError}">Service temporarily unavailable. Please try again later.</p>
-    </div>
+        <div th:if="${param.error}" class="error-message">
+            <p th:text="#{login.error}">Invalid username or password.</p>
+        </div>
+        <div th:if="${param.dbError}" class="error-message db-error">
+            <p th:text="#{login.dbError}">Service temporarily unavailable. Please try again later.</p>
+        </div>
         
         <div th:if="${param.logout}" class="success-message">
             <p th:text="#{login.logout}">You have been logged out.</p>
