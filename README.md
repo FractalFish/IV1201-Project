@@ -104,14 +104,11 @@ docker compose up -d
 
 ## Logging 
 
-### Log in console
+### Logging Docker
 1. `docker compose up --build`
-2. `docker compose logs -f app` (in another terminal)
+2. `docker compose logs -f app` (Another terminal)
+> Logs are also available in the `logs` folder in the root directory.
 
-### Log as a file
-1. `docker compose up db -d`
-2. `.\mvnw.cmd spring-boot:run`
-3. Log file is available at `./logs/recruitment-app.log`
 
 ## Project Structure
 ```
