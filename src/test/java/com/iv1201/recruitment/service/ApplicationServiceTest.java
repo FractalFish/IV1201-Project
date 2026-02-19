@@ -286,7 +286,7 @@ class ApplicationServiceTest {
         when(applicationRepository.findById(1)).thenReturn(Optional.of(testApplication));
         when(applicationRepository.save(any(Application.class))).thenAnswer(inv -> inv.getArgument(0));
 
-        Application result = applicationService.updateStatus(1, ApplicationStatus.ACCEPTED);
+        Application result = applicationService.updateApplicationStatus(1, ApplicationStatus.ACCEPTED, null);
 
         assertEquals(ApplicationStatus.ACCEPTED, result.getStatus());
     }
@@ -300,7 +300,7 @@ class ApplicationServiceTest {
 
         IllegalArgumentException exception = assertThrows(
                 IllegalArgumentException.class,
-                () -> applicationService.updateStatus(999, ApplicationStatus.ACCEPTED)
+                () -> applicationService.updateApplicationStatus(999, ApplicationStatus.ACCEPTED, null)
         );
         assertEquals("Application not found", exception.getMessage());
     }
