@@ -3,17 +3,17 @@
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
-    <title>Home</title>
+    <title th:text="#{home.title}">Home</title>
 </head>
 <body>
-    <h1>Recruitment System</h1>
+    <h1 th:text="#{home.heading}">Recruitment System</h1>
     
     <div sec:authorize="isAuthenticated()">
-        <p>Welcome, <strong sec:authentication="name"></strong>!</p>
-        <p>Role: <strong sec:authentication="principal.authorities"></strong></p>
+        <p><span th:text="#{home.welcome}">Welcome</span>, <strong sec:authentication="name"></strong>!</p>
+        <p><span th:text="#{home.role}">Role</span>: <strong sec:authentication="principal.authorities"></strong></p>
         
         <form th:action="@{/logout}" method="post">
-            <button type="submit">Logout</button>
+            <button type="submit" th:text="#{home.logout}">Logout</button>
         </form>
     </div>
 </body>

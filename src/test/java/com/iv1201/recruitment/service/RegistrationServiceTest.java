@@ -3,6 +3,8 @@ package com.iv1201.recruitment.service;
 import com.iv1201.recruitment.domain.Person;
 import com.iv1201.recruitment.domain.Role;
 import com.iv1201.recruitment.domain.dto.RegistrationForm;
+import com.iv1201.recruitment.exception.EmailAlreadyTakenException;
+import com.iv1201.recruitment.exception.UsernameAlreadyTakenException;
 import com.iv1201.recruitment.repository.PersonRepository;
 import com.iv1201.recruitment.repository.RoleRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -87,11 +89,11 @@ class RegistrationServiceTest {
     void testDuplicateUsername() {
         when(personRepository.existsByUsername("newuser")).thenReturn(true);
 
-        IllegalArgumentException exception = assertThrows(
-                IllegalArgumentException.class,
+        UsernameAlreadyTakenException exception = assertThrows(
+                UsernameAlreadyTakenException.class,
                 () -> registrationService.registerApplicant(validForm)
         );
-        assertTrue(exception.getMessage().contains("Username already exists"));
+        assertTrue(exception.getMessage().contains("newuser"));
     }
 
     /**
@@ -102,27 +104,26 @@ class RegistrationServiceTest {
         when(personRepository.existsByUsername("newuser")).thenReturn(false);
         when(personRepository.existsByEmail("kalle.anka@example.com")).thenReturn(true);
 
-        IllegalArgumentException exception = assertThrows(
-                IllegalArgumentException.class,
+        EmailAlreadyTakenException exception = assertThrows(
+                EmailAlreadyTakenException.class,
                 () -> registrationService.registerApplicant(validForm)
         );
-        assertTrue(exception.getMessage().contains("Email already registered"));
+        assertTrue(exception.getMessage().contains("kalle.anka@example.com"));
     }
 
     /**
      * Verifies that registration fails when both username and email are taken.
+     * Username is checked first, so UsernameAlreadyTakenException is thrown.
      */
     @Test
     void testDuplicateUsernameAndEmail() {
         when(personRepository.existsByUsername("newuser")).thenReturn(true);
-        when(personRepository.existsByEmail("kalle.anka@example.com")).thenReturn(true);
 
-        IllegalArgumentException exception = assertThrows(
-                IllegalArgumentException.class,
+        UsernameAlreadyTakenException exception = assertThrows(
+                UsernameAlreadyTakenException.class,
                 () -> registrationService.registerApplicant(validForm)
         );
-        assertTrue(exception.getMessage().contains("Username already exists"));
-        assertTrue(exception.getMessage().contains("Email already registered"));
+        assertTrue(exception.getMessage().contains("newuser"));
     }
 
     /**

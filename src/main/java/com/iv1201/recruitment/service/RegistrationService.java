@@ -3,18 +3,16 @@ package com.iv1201.recruitment.service;
 import com.iv1201.recruitment.domain.Person;
 import com.iv1201.recruitment.domain.Role;
 import com.iv1201.recruitment.domain.dto.RegistrationForm;
+import com.iv1201.recruitment.exception.EmailAlreadyTakenException;
+import com.iv1201.recruitment.exception.UsernameAlreadyTakenException;
 import com.iv1201.recruitment.repository.PersonRepository;
 import com.iv1201.recruitment.repository.RoleRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.List;
 
 
 
@@ -63,22 +61,15 @@ public class RegistrationService {
     try {
 
 
-        List<String> errors = new ArrayList<>();
-
         if (personRepository.existsByUsername(form.getUsername())) {
-            errors.add("Username already exists");
+            logger.warn("Registration failed: username '{}' already taken", form.getUsername());
+            throw new UsernameAlreadyTakenException(form.getUsername());
         }
 
-        if (form.getEmail() != null && !form.getEmail().isBlank() 
+        if (form.getEmail() != null && !form.getEmail().isBlank()
             && personRepository.existsByEmail(form.getEmail())) {
-            errors.add("Email already registered");
-        }
-
-        if (!errors.isEmpty()) {
-            String errorMessage = String.join(", ", errors);
-            logger.warn("Registration validation failed for username '{}': {}", 
-               form.getUsername(), errorMessage);
-            throw new IllegalArgumentException(errorMessage);
+            logger.warn("Registration failed: email '{}' already taken", form.getEmail());
+            throw new EmailAlreadyTakenException(form.getEmail());
         }
 
 

@@ -1,10 +1,13 @@
 package com.iv1201.recruitment.controller;
 
 import com.iv1201.recruitment.domain.dto.RegistrationForm;
+import com.iv1201.recruitment.exception.EmailAlreadyTakenException;
+import com.iv1201.recruitment.exception.UsernameAlreadyTakenException;
 import com.iv1201.recruitment.service.RegistrationService;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -69,13 +72,26 @@ public class RegistrationController {
             registrationService.registerApplicant(form);
             redirectAttributes.addFlashAttribute("successMessage", "Registration successful! Please login.");
             return "redirect:/login";
-        } catch (IllegalArgumentException e) {
-            bindingResult.reject("error.registration.failed", e.getMessage());
+        }
+        catch (UsernameAlreadyTakenException e) {
+            logger.debug("Registration failed: username already taken");
+            bindingResult.rejectValue("username", "error.username.taken");
             return "register";
-        } catch (Exception e) {
+        }
+        catch (EmailAlreadyTakenException e) {
+            logger.debug("Registration failed: email already taken");
+            bindingResult.rejectValue("email", "error.email.taken");
+            return "register";
+        }
+        catch (DataIntegrityViolationException e) {
+            logger.debug("Registration failed due to data integrity: {}", e.getMessage());
+            bindingResult.reject("error.registration.failed");
+            return "register";
+        }
+        catch (Exception e) {
             logger.error("Unexpected registration error for user '{}': {}", form.getUsername(), e.getMessage(), e);
-            bindingResult.reject("error.registration.failed", "Registration failed. Please try again.");
+            bindingResult.reject("error.registration.failed");
             return "register";
-}
+        }
     }
 }

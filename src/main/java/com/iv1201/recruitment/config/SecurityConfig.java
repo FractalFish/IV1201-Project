@@ -10,6 +10,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
+import com.iv1201.recruitment.exception.DatabaseUnavailableException;
 import com.iv1201.recruitment.service.AuthService;
 
 import org.slf4j.Logger;
@@ -29,6 +30,30 @@ public class SecurityConfig {
     
     public SecurityConfig(AuthService authService) {
         this.authService = authService;
+    }
+    
+    /**
+     * Helper method to check if any cause in the exception chain is a database-related exception.
+     *
+     * @param exception the exception to check
+     * @return true if a database error is found in the cause chain
+     */
+    private boolean hasDatabaseErrorInCause(Throwable exception) {
+        Throwable cause = exception.getCause();
+        while (cause != null) {
+            if (cause instanceof DatabaseUnavailableException ||
+                cause instanceof org.springframework.dao.DataAccessException ||
+                cause instanceof org.springframework.transaction.CannotCreateTransactionException ||
+                cause instanceof org.springframework.transaction.TransactionSystemException ||
+                cause instanceof org.springframework.security.authentication.InternalAuthenticationServiceException ||
+                cause instanceof java.sql.SQLTransientConnectionException ||
+                cause instanceof java.sql.SQLNonTransientConnectionException ||
+                cause instanceof java.sql.SQLException) {
+                return true;
+            }
+            cause = cause.getCause();
+        }
+        return false;
     }
     
     @Bean
@@ -63,13 +88,25 @@ public class SecurityConfig {
                         authentication.getAuthorities());
                     response.sendRedirect("/");
                 })
-                // failure handler to log failed login attempts
+                // failure handler to log failed login attempts and distinguish error types
                 .failureHandler((request, response, exception) -> {
                     String username = request.getParameter("username");
-                    logger.warn("Login failed: username={}, reason={}", 
-                        username != null ? username : "unknown", 
-                        exception.getMessage());
-                    response.sendRedirect("/login?error");
+                    
+                    // Check for database errors in the exception chain
+                    boolean isDatabaseError = exception instanceof DatabaseUnavailableException ||
+                            exception instanceof org.springframework.security.authentication.InternalAuthenticationServiceException ||
+                            hasDatabaseErrorInCause(exception);
+                    
+                    if (isDatabaseError) {
+                        logger.error("Login failed due to database unavailability: username={}", 
+                            username != null ? username : "unknown");
+                        response.sendRedirect("/login?dbError");
+                    } else {
+                        logger.warn("Login failed: username={}, reason={}", 
+                            username != null ? username : "unknown", 
+                            exception.getMessage());
+                        response.sendRedirect("/login?error");
+                    }
                 })
                 .permitAll()
             )
