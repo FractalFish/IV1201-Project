@@ -1,0 +1,40 @@
+services:
+  # Standalone Chrome - accessible on port 4444
+  chrome:
+    image: selenium/standalone-chrome:4.27.0
+    container_name: selenium-chrome
+    shm_size: 2gb
+    ports:
+      - "4444:4444"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - test-network
+
+  # Standalone Firefox - accessible on port 4445
+  firefox:
+    image: selenium/standalone-firefox:4.27.0
+    container_name: selenium-firefox
+    shm_size: 2gb
+    ports:
+      - "4445:4444"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - test-network
+
+  # Standalone Edge - accessible on port 4446
+  edge:
+    image: selenium/standalone-edge:4.27.0
+    container_name: selenium-edge
+    shm_size: 2gb
+    ports:
+      - "4446:4444"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - test-network
+
+networks:
+  test-network:
+    driver: bridge
