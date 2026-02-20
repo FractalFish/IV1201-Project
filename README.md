@@ -87,6 +87,29 @@ docker compose down -v
 docker compose up -d
 ```
 
+## Cross browser testing
+
+### Local Machine
+1. `docker compose up db -d`
+2. `.\mvnw.cmd spring-boot:run`
+3. `.\test-browsers.ps1`
+
+### Local Docker (used to develop and debug CI Docker)
+1. `docker compose up db -d`
+2. `docker compose -f docker-compose.selenium.yml up -d`
+3. `.\mvnw.cmd spring-boot:run`
+4. `.\mvnw.cmd test "-Dtest=CrossBrowserTest" "-Dbrowser=chrome" "-Dapp.url=http://host.docker.internal:8080" "-Dsurefire.excludes=none"` (replace chrome with firefox or edge)
+5. `docker compose -f docker-compose.selenium.yml down`
+
+
+## Logging 
+
+### Logging Docker
+1. `docker compose up --build`
+2. `docker compose logs -f app` (Another terminal)
+> Logs are also available in the `logs` folder in the root directory.
+
+
 ## Project Structure
 ```
 src/main/java/com/iv1201/recruitment/
