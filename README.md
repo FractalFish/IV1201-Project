@@ -22,6 +22,7 @@ A recruitment system for managing job applications, built with Spring Boot.
 - Maven
 - Docker & Docker Compose
 - GitHub Actions (CI/CD)
+- Selenium
 
 ## Prerequisites
 - Java 21 (JDK)
