@@ -27,9 +27,11 @@ public class RegistrationForm {
     @Size(max = 255, message = "{validation.surname.size}")
     private String surname;
     
-    @Pattern(regexp = "^(\\d{8}-\\d{4})?$", message = "{validation.pnr.format}")
+    @NotBlank(message = "{validation.pnr.required}")
+    @Pattern(regexp = "^\\d{8}-\\d{4}$", message = "{validation.pnr.format}")
     private String pnr;
-    
+
+    @NotBlank(message = "{validation.email.required}")
     @Email(message = "{validation.email.format}")
     private String email;
 
