@@ -50,17 +50,17 @@
             </div>
             
             <div class="form-group">
-                <label for="pnr" th:text="#{register.pnr}">Personal Number (optional)</label>
+                <label for="pnr" th:text="#{register.pnr}">Personal Number</label>
                 <input type="text" id="pnr" th:field="*{pnr}" 
-                       th:placeholder="#{register.pnr.placeholder}">
+                       th:placeholder="#{register.pnr.placeholder}" required>
                 <span th:if="${#fields.hasErrors('pnr')}" class="field-error" 
                       th:errors="*{pnr}">PNR error</span>
             </div>
             
             <div class="form-group">
-                <label for="email" th:text="#{register.email}">Email (optional)</label>
+                <label for="email" th:text="#{register.email}">Email</label>
                 <input type="email" id="email" th:field="*{email}" 
-                       th:placeholder="#{register.email.placeholder}">
+                       th:placeholder="#{register.email.placeholder}" required>
                 <span th:if="${#fields.hasErrors('email')}" class="field-error" 
                       th:errors="*{email}">Email error</span>
             </div>
