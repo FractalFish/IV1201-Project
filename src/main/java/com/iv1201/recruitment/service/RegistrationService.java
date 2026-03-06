@@ -139,4 +139,26 @@ public class RegistrationService {
                 .orElse(false);
     }
 
+    /**
+     * Completes registration for a legacy user by setting password.
+     *
+     * @param email the user's email
+     * @param username the desired username
+     * @param password the user's password
+     */
+    @Transactional
+    public void completeLegacyRegistration(String email, String username, String password) {
+        var personOpt = personRepository.findByEmail(email);
+        
+        if (personOpt.isEmpty()) {
+            throw new IllegalArgumentException("User not found");
+        }
+        
+        Person person = personOpt.get();
+        person.setUsername(username);
+        person.setPassword(passwordEncoder.encode(password));
+        
+        personRepository.save(person);
+    }
+
 }
