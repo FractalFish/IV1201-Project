@@ -125,5 +125,18 @@ public class RegistrationService {
     public boolean isEmailTaken(String email) {
         return email != null && !email.isBlank() && personRepository.existsByEmail(email);
     }
-    
+
+    /**
+     * Checks if a person with the given email is a legacy user
+     * (has application but no password set).
+     *
+     * @param email the email to check
+     * @return true if legacy user exists, false otherwise
+     */
+    public boolean isLegacyUser(String email) {
+        return personRepository.findByEmail(email)
+                .map(p -> p.getPassword() == null || p.getPassword().isEmpty())
+                .orElse(false);
+    }
+
 }
