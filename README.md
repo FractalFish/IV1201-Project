@@ -195,5 +195,3 @@ Migration files: `src/main/resources/db/migration/`
 
 - This **README.md** serves as the primary handover documentation.
 - Wiki (architecture decisions / ADL): https://github.com/FractalFish/IV1201-Project/wiki
-- `project-docs/ADR/` — Architecture Decision Records (repo-based ADRs)
-- `project-docs/reports/` — Technical reports and guides
