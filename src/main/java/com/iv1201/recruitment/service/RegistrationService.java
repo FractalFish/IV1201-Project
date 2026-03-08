@@ -153,6 +153,10 @@ public class RegistrationService {
         if (personOpt.isEmpty()) {
             throw new IllegalArgumentException("User not found");
         }
+
+        if (personRepository.existsByUsername(username)) {
+            throw new UsernameAlreadyTakenException(username);
+        }
         
         Person person = personOpt.get();
         person.setUsername(username);
