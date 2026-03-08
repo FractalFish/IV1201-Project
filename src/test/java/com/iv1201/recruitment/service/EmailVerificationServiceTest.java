@@ -38,7 +38,7 @@ class EmailVerificationServiceTest {
 
     @Test
     void testGenerateToken() {
-        when(repository.deleteByEmail(anyString())).thenReturn(0);
+        doNothing().when(repository).deleteByEmail(anyString());
         when(repository.save(any(EmailVerification.class))).thenAnswer(i -> i.getArgument(0));
 
         String token = service.generateToken("test@example.com");
