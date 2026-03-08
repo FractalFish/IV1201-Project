@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Complete Registration</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 400px; margin: 50px auto; padding: 20px; }
+        input { width: 100%; padding: 10px; margin: 10px 0; }
+        button { width: 100%; padding: 10px; background: #4CAF50; color: white; border: none; }
+        .error { color: red; }
+    </style>
+</head>
+<body>
+    <h1>Complete Registration</h1>
+    <p>Set your username and password.</p>
+    
+    <div th:if="${error}" class="error" th:text="${error}"></div>
+    
+    <form th:action="@{/verify}" method="post">
+        <input type="hidden" name="token" th:value="${token}">
+        <input type="text" name="username" placeholder="Username" required>
+        <input type="password" name="password" placeholder="Password" required>
+        <button type="submit">Complete Registration</button>
+    </form>
+</body>
+</html>

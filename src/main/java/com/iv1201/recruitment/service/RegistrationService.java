@@ -125,5 +125,40 @@ public class RegistrationService {
     public boolean isEmailTaken(String email) {
         return email != null && !email.isBlank() && personRepository.existsByEmail(email);
     }
-    
+
+    /**
+     * Checks if a person with the given email is a legacy user
+     * (has application but no password set).
+     *
+     * @param email the email to check
+     * @return true if legacy user exists, false otherwise
+     */
+    public boolean isLegacyUser(String email) {
+        return personRepository.findByEmail(email)
+                .map(p -> p.getPassword() == null || p.getPassword().isEmpty())
+                .orElse(false);
+    }
+
+    /**
+     * Completes registration for a legacy user by setting password.
+     *
+     * @param email the user's email
+     * @param username the desired username
+     * @param password the user's password
+     */
+    @Transactional
+    public void completeLegacyRegistration(String email, String username, String password) {
+        var personOpt = personRepository.findByEmail(email);
+        
+        if (personOpt.isEmpty()) {
+            throw new IllegalArgumentException("User not found");
+        }
+        
+        Person person = personOpt.get();
+        person.setUsername(username);
+        person.setPassword(passwordEncoder.encode(password));
+        
+        personRepository.save(person);
+    }
+
 }

@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Claim Account</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 400px; margin: 50px auto; padding: 20px; }
+        input { width: 100%; padding: 10px; margin: 10px 0; }
+        button { width: 100%; padding: 10px; background: #4CAF50; color: white; border: none; }
+        .error { color: red; }
+        .success { color: green; }
+    </style>
+</head>
+<body>
+    <h1>Claim Your Account</h1>
+    <p>Enter your email to claim your account.</p>
+    
+    <div th:if="${error}" class="error" th:text="${error}"></div>
+    <div th:if="${success}" class="success" th:text="${success}"></div>
+    
+    <form th:action="@{/claim}" method="post">
+        <input type="email" name="email" placeholder="Enter your email" required>
+        <button type="submit">Send Verification Link</button>
+    </form>
+    
+    <p><a th:href="@{/login}">Back to Login</a></p>
+</body>
+</html>
